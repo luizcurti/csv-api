@@ -1,538 +1,308 @@
-# CSV-API# CSV-API
+# CSV-API
+
+![CI](https://github.com/luizcurti/csv-api/workflows/CI/badge.svg)
+
+REST API for CSV data management with complete CRUD operations using Clean Architecture principles.
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- npm
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Or use interactive menu
+npm run menu
+```
+
+**API Base URL**: `http://localhost:3005/api/csv`
+
+**Postman Collection**: `data_csv.postman_collection.json`
 
 
 
-REST API for CSV data management with complete CRUD operations.API REST para gerenciamento de dados CSV com operações CRUD completas.
+## �️ Available Scripts
+
+### Development
+```bash
+npm run dev              # Start development server with hot reload
+npm run dev:menu         # Interactive development menu
+```
+
+### Testing
+```bash
+npm test                 # Run unit tests with coverage
+npm run test:watch       # Run tests in watch mode  
+npm run test:api         # Test all API endpoints
+npm run test:collection  # Test Postman collection
+```
+
+### Build & Production
+```bash
+npm run build            # Compile TypeScript to dist/
+npm start                # Start production server
+npm run clean            # Clean build files
+```
+
+### Code Quality
+```bash
+npm run eslint           # Check code quality
+npm run eslint:fix       # Fix ESLint issues automatically
+```
+
+### Automation
+
+```bash
+npm run menu             # Interactive development menu
+npm run start:test       # Build + Start + Test + Stop
+npm run ci               # Full CI pipeline (lint + test + build)
+npm run setup            # Initial project setup
+```
+
+## 📋 API Endpoints
+
+### Base URL
+```
+http://localhost:3005/api/csv/
+```
+
+### Routes
+
+#### GET `/api/csv/`
+- **Description**: List all products
+- **Response**: Array of products
+- **Status**: 200 OK
+
+#### POST `/api/csv/`
+- **Description**: Create new product
+- **Body**:
+```json
+{
+  "product_code": "string",
+  "quantity": "string",
+  "pick_location": "string"
+}
+```
+- **Response**: Created product
+- **Status**: 201 Created
+
+#### GET `/api/csv/:product_code`
+- **Description**: Find product by code
+- **Response**: Product object
+- **Status**: 200 OK / 404 Not Found
+
+#### PUT `/api/csv/:product_code`
+- **Description**: Update existing product
+- **Body**:
+```json
+{
+  "quantity": "string",
+  "pick_location": "string"
+}
+```
+- **Response**: Success message
+- **Status**: 200 OK / 404 Not Found
+
+#### DELETE `/api/csv/:product_code`
+- **Description**: Delete product by code
+- **Response**: Success message
+- **Status**: 200 OK / 404 Not Found
 
 
 
-## 📋 Prerequisites## 📋 Pré-requisitos
+## 🧪 Testing
 
+### Unit Tests
+- **Framework**: Jest with TypeScript
+- **Coverage**: 100% code coverage (74 tests)
+- **Location**: `src/tests/`
+- **Command**: `npm test`
 
+### API Testing
+- **Tool**: Automated bash scripts with curl
+- **Script**: `./scripts/test-api.sh`
+- **Command**: `npm run test:api`
 
-Before booting the system, run "npm install"Before booting the system, run "npm install"
+### Test Categories
+- ✅ Use Cases (business logic)
+- ✅ Controllers (HTTP handlers)  
+- ✅ Repository (data access)
+- ✅ Error handling
+- ✅ Integration tests
 
+## 🏗️ Architecture
 
+This project follows **Clean Architecture** principles:
 
-The route for testing the api is: http://localhost:3005/api/csv/The route for testing the api is: http://localhost:3005/api/csv/
+### Project Structure
+```
+src/
+├── errors/                 # Custom error classes
+│   └── appError.ts
+├── modules/
+│   └── data/
+│       ├── repositories/   # Data access layer
+│       │   ├── dbDataRepository.ts
+│       │   └── iDataRepository.ts
+│       └── useCases/      # Business logic
+│           ├── createData/
+│           ├── deleteData/
+│           ├── editData/
+│           ├── listAllData/
+│           └── listDataById/
+├── shared/
+│   └── infra/
+│       ├── app.ts         # Express configuration
+│       ├── server.ts      # Main server
+│       └── http/
+│           ├── middlewares/
+│           └── routes/
+└── tests/                 # Unit tests (100% coverage)
+```
 
+### Design Patterns
+- ✅ Clean Architecture
+- ✅ Repository Pattern
+- ✅ Use Case Pattern
+- ✅ Dependency Injection
+- ✅ Error Handling Pattern
 
+## 🔧 Configuration
 
-The file "Data CSV.postman_collection" contains the routes for testing in PostmanThe file "Data CSV.postman_collection" contains the routes for testing in Postman
+### ESLint
+- ✅ Airbnb + Prettier configuration
+- ✅ TypeScript support
+- ✅ Jest testing support
+- ✅ Automatic fix available
 
+### Jest
+- ✅ TypeScript configuration
+- ✅ Path mapping (@modules, @shared)
+- ✅ 100% code coverage
+- ✅ HTML, text, and LCOV reports
 
+### Babel
+- ✅ TypeScript compilation
+- ✅ Path aliases support
+- ✅ Static file copying
 
-## 🚀 Quick Start## 🚀 Quick Start
+## 🚦 Development Workflow
 
+### Daily Development
+```bash
+# Use interactive menu
+npm run menu
 
-
-```bash```bash
-
-# Initial setup# Setup inicial
-
-npm run setupnpm run setup
-
-
-
-# Development# Desenvolvimento
-
-npm run devnpm run dev
-
-
-
-# Production# Produção
-
-npm run build && npm startnpm run build && npm start
-
-
-
-# Automated tests# Testes automatizados
-
-npm run start:testnpm run start:test
-
+# Or start dev server
+npm run dev
+npm run start:test
 ``````
 
 
 
-## 🛠️ Available Scripts## � Scripts Disponíveis
+### For CI/CD
 
+```bash
+npm run ci
 
+``````
 
-### NPM Scripts### Scripts NPM
+### For Initial Setup
 
+To perform the initial project setup, run:
 
+```bash
+npm run setup
 
-```bash```bash
+``````
 
-# Development# Desenvolvimento
+## 📊 Usage Examples
 
-npm run dev              # Start server in development modenpm run dev              # Inicia servidor em modo desenvolvimento
+### Complete API Testing
 
-npm run dev:menu         # Interactive development menunpm run dev:menu         # Menu interativo de desenvolvimento
+```bash
+# 1. Compile the project
+npm run build
 
+# 2. Start server in background
+npm start &
 
+# 3. Execute API tests
+npm run test:api
 
-# Build and Deploy# Build e Deploy
-
-npm run build            # Compile TypeScript projectnpm run build            # Compila o projeto TypeScript
-
-npm run start            # Start server in productionnpm run start            # Inicia servidor em produção
-
-npm run clean            # Clean build filesnpm run clean            # Limpa arquivos de build
-
-
-
-# Tests# Testes
-
-npm test                 # Run unit tests with coveragenpm test                 # Executa testes unitários com cobertura
-
-npm run test:watch       # Run tests in watch modenpm run test:watch       # Executa testes em modo watch
-
-npm run test:unit        # Run unit tests onlynpm run test:unit        # Executa apenas testes unitários
-
-npm run test:api         # Test API endpoints with curlnpm run test:api         # Testa endpoints da API com curl
-
-
-
-# Code Quality# Qualidade do Código
-
-npm run eslint           # Check code with ESLintnpm run eslint           # Verifica código com ESLint
-
-npm run eslint:fix       # Automatically fix ESLint issuesnpm run eslint:fix       # Corrige automaticamente problemas do ESLint
-
-
-
-# Complete Automation# Automação Completa
-
-npm run start:test       # Build + Start + Test API + Stopnpm run start:test       # Build + Start + Test API + Stop
-
-npm run ci               # CI pipeline (lint + test + build)npm run ci               # Pipeline de CI (lint + test + build)
-
-npm run setup            # Initial project setupnpm run setup            # Setup inicial do projeto
+# 4. Stop the server
+kill %1
 
 ``````
 
 
+### Development with Hot Reload
 
-### Bash Scripts### Scripts Bash
+To start the development server with hot reload, run:
 
-
-
-#### 🌐 Test API (`./scripts/test-api.sh`)#### 🌐 Test API (`./scripts/test-api.sh`)
-
-
-
-Automated script that tests all API endpoints:Script automatizado que testa todos os endpoints da API:
-
-
-
-```bash```bash
-
-./scripts/test-api.sh./scripts/test-api.sh
+```bash
+npm run dev
 
 ``````
 
+### Quality Verification
 
+To run code quality checks and tests, use the following command:
 
-**What the script tests:****O que o script testa:**
-
-- ✅ GET /api/csv/ - List all data- ✅ GET /api/csv/ - Lista todos os dados
-
-- ✅ POST /api/csv/ - Create new product- ✅ POST /api/csv/ - Cria novo produto
-
-- ✅ GET /api/csv/:id - Find product by ID- ✅ GET /api/csv/:id - Busca produto por ID
-
-- ✅ PUT /api/csv/:id - Edit product- ✅ PUT /api/csv/:id - Edita produto
-
-- ✅ DELETE /api/csv/:id - Remove product- ✅ DELETE /api/csv/:id - Remove produto
-
-- ✅ Error validation (duplicate product, not found)- ✅ Validação de erros (produto duplicado, não encontrado)
-
-
-
-#### 🛠️ Development Menu (`./scripts/dev-menu.sh`)#### 🛠️ Menu de Desenvolvimento (`./scripts/dev-menu.sh`)
-
-
-
-Interactive menu for all development operations:Menu interativo para todas as operações de desenvolvimento:
-
-
-
-```bash```bash
-
-./scripts/dev-menu.sh./scripts/dev-menu.sh
+```bash
+npm run eslint:fix && npm test
 
 ``````
 
+## 🎯 VS Code Configuration
 
+For better VS Code integration, you can configure automatic tasks:
 
-**Available options:****Opções disponíveis:**
+### `.vscode/tasks.json`
 
-1. 🏗️ Build project1. 🏗️ Build project
-
-2. 🚀 Start server2. 🚀 Start server
-
-3. 🧪 Run unit tests3. 🧪 Run unit tests
-
-4. 🔍 Run ESLint4. 🔍 Run ESLint
-
-5. 🌐 Test API endpoints5. 🌐 Test API endpoints
-
-6. 🚀 Start server + Test API6. 🚀 Start server + Test API
-
-7. 🔧 Full development cycle7. 🔧 Full development cycle
-
-8. 📊 Generate test coverage8. 📊 Generate test coverage
-
-9. 🧹 Clean build directory9. 🧹 Clean build directory
-
-
-
-## 🔧 Automated Configurations## 🔧 Configurações Automatizadas
-
-
-
-### ESLint### ESLint
-
-- ✅ Configured with Airbnb + Prettier- ✅ Configurado com Airbnb + Prettier
-
-- ✅ Ignores `dist/` and `node_modules/` folders- ✅ Ignora pasta `dist/` e `node_modules/`
-
-- ✅ Jest support- ✅ Suporte ao Jest
-
-- ✅ Automatic fix available- ✅ Fix automático disponível
-
-
-
-### Jest### Jest
-
-- ✅ Configured for TypeScript- ✅ Configurado para TypeScript
-
-- ✅ Path mapping support (@modules, @shared, etc.)- ✅ Suporte a path mapping (@modules, @shared, etc.)
-
-- ✅ Automatic code coverage- ✅ Cobertura de código automática
-
-- ✅ Reports in HTML, text, and LCOV- ✅ Relatórios em HTML, texto e LCOV
-
-
-
-### Build### Build
-
-- ✅ Babel configured for TypeScript- ✅ Babel configurado para TypeScript
-
-- ✅ Copies static files (CSV, etc.)- ✅ Copia arquivos estáticos (CSV, etc.)
-
-- ✅ Source maps for debugging- ✅ Source maps para debugging
-
-
-
-## 🚦 Recommended Development Workflow## 🚦 Fluxo de Desenvolvimento Recomendado
-
-
-
-### For daily development:### Para desenvolvimento diário:
-
-```bash```bash
-
-npm run dev:menunpm run dev:menu
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Dev Server",
+      "type": "npm",
+      "script": "dev",
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "Test API",
+      "type": "npm",
+      "script": "test:api",
+      "group": "test"
+    },
+    {
+      "label": "Full CI",
+      "type": "npm",
+      "script": "ci",
+      "group": "build"
+    }
+  ]
+}
 
 ``````
+### `.vscode/launch.json`
 
+```json
 
 
-### To quickly test the API:### Para testar rapidamente a API:
 
-```bash```bash
 
-npm run start:testnpm run start:test
 
-``````
-
-
-
-### For CI/CD:### Para CI/CD:
-
-```bash```bash
-
-npm run cinpm run ci
-
-``````
-
-
-
-### For initial setup:### Para setup inicial:
-
-```bash```bash
-
-npm run setupnpm run setup
-
-``````
-
-
-
-## 📊 Usage Examples## 📊 Exemplos de Uso
-
-
-
-### Complete API testing### Teste completo da API
-
-```bash```bash
-
-# 1. Compile the project# 1. Compile o projeto
-
-npm run buildnpm run build
-
-
-
-# 2. Start server in background# 2. Inicie o servidor em background
-
-npm start &npm start &
-
-
-
-# 3. Execute API tests# 3. Execute os testes da API
-
-npm run test:apinpm run test:api
-
-
-
-# 4. Stop the server# 4. Pare o servidor
-
-kill %1kill %1
-
-``````
-
-
-
-### Development with hot reload### Desenvolvimento com hot reload
-
-```bash```bash
-
-npm run devnpm run dev
-
-``````
-
-
-
-### Quality verification### Verificação de qualidade
-
-```bash```bash
-
-npm run eslint:fix && npm testnpm run eslint:fix && npm test
-
-``````
-
-
-
-## 🎯 VS Code Configuration## 🎯 Configuração do VS Code
-
-
-
-For better VS Code integration, you can configure automatic tasks:Para melhor integração com o VS Code, você pode configurar tasks automáticas:
-
-
-
-### `.vscode/tasks.json`### `.vscode/tasks.json`
-
-```json```json
-
-{{
-
-  "version": "2.0.0",  "version": "2.0.0",
-
-  "tasks": [  "tasks": [
-
-    {    {
-
-      "label": "Start Dev Server",      "label": "Start Dev Server",
-
-      "type": "npm",      "type": "npm",
-
-      "script": "dev",      "script": "dev",
-
-      "group": "build",      "group": "build",
-
-      "isBackground": true      "isBackground": true
-
-    },    },
-
-    {    {
-
-      "label": "Test API",      "label": "Test API",
-
-      "type": "npm",       "type": "npm", 
-
-      "script": "test:api",      "script": "test:api",
-
-      "group": "test"      "group": "test"
-
-    },    },
-
-    {    {
-
-      "label": "Full CI",      "label": "Full CI",
-
-      "type": "npm",      "type": "npm",
-
-      "script": "ci",       "script": "ci", 
-
-      "group": "build"      "group": "build"
-
-    }    }
-
-  ]  ]
-
-}}
-
-``````
-
-
-
-### `.vscode/launch.json`### `.vscode/launch.json`
-
-```json```json
-
-{{
-
-  "version": "0.2.0",  "version": "0.2.0",
-
-  "configurations": [  "configurations": [
-
-    {    {
-
-      "name": "Debug API",      "name": "Debug API",
-
-      "type": "node",      "type": "node",
-
-      "request": "launch",      "request": "launch",
-
-      "program": "${workspaceFolder}/src/shared/infra/server.ts",      "program": "${workspaceFolder}/src/shared/infra/server.ts",
-
-      "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],      "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],
-
-      "env": {      "env": {
-
-        "ENV": "LOCAL"        "ENV": "LOCAL"
-
-      }      }
-
-    }    }
-
-  ]  ]
-
-}}
-
-``````
-
-
-
-## 🔄 Continuous Integration## 🔄 Integração Contínua
-
-
-
-The project is configured for CI/CD with the script:O projeto está configurado para CI/CD com o script:
-
-
-
-```bash```bash
-
-npm run cinpm run ci
-
-``````
-
-
-
-This command executes:Este comando executa:
-
-1. ESLint (code verification)1. ESLint (verificação de código)
-
-2. Unit tests (with coverage)2. Testes unitários (com cobertura)
-
-3. Project build3. Build do projeto
-
-
-
-## 📈 Metrics and Reports## 📈 Métricas e Relatórios
-
-
-
-### Test Coverage### Cobertura de Testes
-
-```bash```bash
-
-npm testnpm test
-
-# Generates report at: coverage/lcov-report/index.html# Gera relatório em: coverage/lcov-report/index.html
-
-``````
-
-
-
-### Code Analysis### Análise de Código
-
-```bash```bash
-
-npm run eslintnpm run eslint
-
-# Shows quality issues# Mostra problemas de qualidade
-
-``````
-
-
-
-## 📚 Project Structure## 📚 Estrutura do Projeto
-
-
-
-``````
-
-src/src/
-
-├── errors/              # Custom error classes├── errors/              # Classes de erro customizadas
-
-├── modules/├── modules/
-
-│   └── data/│   └── data/
-
-│       ├── repositories/    # Data access layer│       ├── repositories/    # Camada de acesso a dados
-
-│       └── useCases/       # Business rules│       └── useCases/       # Regras de negócio
-
-│           ├── createData/│           ├── createData/
-
-│           ├── deleteData/│           ├── deleteData/
-
-│           ├── editData/│           ├── editData/
-
-│           ├── listAllData/│           ├── listAllData/
-
-│           └── listDataById/│           └── listDataById/
-
-├── shared/├── shared/
-
-│   └── infra/│   └── infra/
-
-│       ├── app.ts          # Express configuration│       ├── app.ts          # Configuração do Express
-
-│       ├── server.ts       # Main server│       ├── server.ts       # Servidor principal
-
-│       └── http/│       └── http/
-
-│           ├── middlewares/ # HTTP middlewares│           ├── middlewares/ # Middlewares HTTP
-
-│           └── routes/      # Route definitions│           └── routes/      # Definição de rotas
-
-└── tests/                  # Unit tests└── tests/                  # Testes unitários
-
-``````
-
-
-
-## 📋 API Endpoints---
-
-
-
-### Base URL**💡 Dica:** Use `npm run dev:menu` para acessar todas as funcionalidades através de um menu interativo!
+### Base URL
 ```
 http://localhost:3005/api/csv/
 ```
@@ -633,26 +403,63 @@ This project follows **Clean Architecture** principles:
 - ✅ Use Case Pattern
 - ✅ Error Handling Pattern
 
+## � Scripts Overview
+
+### Interactive Menu (`npm run menu`)
+1. 🏗️ Build project
+2. 🚀 Start server
+3. 🧪 Run unit tests
+4. �🔍 Run ESLint
+5. 🌐 Test API endpoints
+6. 📋 Test Postman collection
+7. 🚀 Start server + Test API
+8. 🔧 Full development cycle
+9. 📊 Generate test coverage
+10. 🧹 Clean build directory
+11. 🔄 CI Pipeline
+
+### Automated Scripts
+- `./scripts/test-api.sh` - Complete API testing
+- `./scripts/test-collection.sh` - Postman collection testing
+- `./scripts/dev-menu.sh` - Interactive development menu
+- `./scripts/validate-workflows.sh` - GitHub Actions validation
+
 ## 🔍 Features
 
 - ✅ **Complete CRUD Operations**
 - ✅ **CSV File Management**
-- ✅ **Data Validation**
+- ✅ **Data Validation (Yup)**
 - ✅ **Error Handling**
-- ✅ **Unit Testing (100% coverage)**
+- ✅ **100% Test Coverage**
 - ✅ **ESLint + Prettier**
 - ✅ **TypeScript Support**
 - ✅ **Hot Reload Development**
 - ✅ **Automated Testing Scripts**
-- ✅ **CI/CD Pipeline**
+- ✅ **GitHub Actions CI/CD**
+- ✅ **Interactive Development Menu**
+- ✅ **Clean Architecture**
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Environment Variables
+- `PORT`: Server port (default: 3005)
+- `ENV`: Environment (LOCAL, PROD)
 
 ## 🤝 Contributing
 
 1. Fork the project
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Run tests (`npm test`)
+4. Run linting (`npm run eslint:fix`)
+5. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+6. Push to the branch (`git push origin feature/AmazingFeature`)
+7. Open a Pull Request
 
 ## 📄 License
 
@@ -660,4 +467,4 @@ This project is licensed under the MIT License.
 
 ---
 
-**💡 Tip:** Use `npm run dev:menu` to access all features through an interactive menu!
+**💡 Pro Tip:** Use `npm run menu` for an interactive development experience with all available options!
