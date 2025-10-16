@@ -1,0 +1,53 @@
+name: CI
+
+# Trigger only on push/PR to main branch
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: CI Pipeline
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout code
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # Install packages
+      - name: 📦 Install packages
+        run: npm ci
+
+      # Run all lints at once
+      - name: 🔍 Run ESLint
+        run: npm run eslint
+
+      # Run all Jest tests at once
+      - name: 🧪 Run Jest tests
+        run: npm test
+
+      # Build project
+      - name: 🏗️ Build project
+        run: npm run build
+
+      # Security audit
+      - name: 🔒 Security audit
+        run: npm audit --audit-level moderate
+
+      # Upload coverage
+      - name: � Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false

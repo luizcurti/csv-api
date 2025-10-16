@@ -1,14 +1,26 @@
 {
-  "name": "DATA",
+  "name": "csv-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix",
     "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathPattern=unit.spec.ts",
     "dev": "ENV=LOCAL ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules --respawn src/shared/infra/server.ts",
     "build": "rm -rf dist && babel src --extensions \".js,.ts\" --out-dir dist --copy-files",
-    "start": "node dist/shared/infra/server.js"
+    "start": "node dist/shared/infra/server.js",
+    "test:api": "./scripts/test-api.sh",
+    "test:collection": "./scripts/test-collection.sh",
+    "dev:menu": "./scripts/dev-menu.sh",
+    "menu": "./scripts/dev-menu.sh",
+    "validate:workflows": "./scripts/validate-workflows.sh",
+    "start:test": "npm run build && npm start & sleep 3 && npm run test:api && kill %1",
+    "clean": "rm -rf dist coverage node_modules/.cache",
+    "setup": "npm install && npm run build",
+    "ci": "npm run eslint && npm run test && npm run build"
   },
   "author": "Luiz Curti",
   "license": "ISC",

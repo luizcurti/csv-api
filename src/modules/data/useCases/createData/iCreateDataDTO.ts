@@ -3,3 +3,8 @@ export interface IRequest {
   quantity: string;
   pick_location: string;
 }
+
+export interface IResponse {
+  message: string;
+  data?: any;
+}

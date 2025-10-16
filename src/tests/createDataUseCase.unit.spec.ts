@@ -32,16 +32,16 @@ describe('CreateDataUseCase', () => {
     const dbDataRepository = new DBDataRepository();
     const useCase = new CreateDataUseCase(dbDataRepository);
   
-    // Criação inicial de dados
+    const uniqueProductCode = `TEST_${Date.now()}`;
+    
     await useCase.execute({ 
-      product_code: '123456',
+      product_code: uniqueProductCode,
       quantity: '10',
       pick_location: 'A1'
     });
   
-    // Tentativa de criar o mesmo dado novamente, deve falhar
     await expect(useCase.execute({ 
-      product_code: '123456',
+      product_code: uniqueProductCode,
       quantity: '10',
       pick_location: 'A1'
     })).rejects.toThrowError(new AppError('Data exist', 404, 'Not Found'));
@@ -51,8 +51,7 @@ describe('CreateDataUseCase', () => {
   it('should throw an error if the repository throws an error', async () => {
     const dbDataRepository = new DBDataRepository();
     const useCase = new CreateDataUseCase(dbDataRepository);
-  
-    // Simulando um erro no repositório, por exemplo, erro de validação de produto duplicado
+
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
       throw new AppError('Data exist', 404, 'Not Found');
     });
@@ -68,7 +67,6 @@ describe('CreateDataUseCase', () => {
     const dbDataRepository = new DBDataRepository();
     const useCase = new CreateDataUseCase(dbDataRepository);
   
-    // Simulando um erro inesperado no repositório
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
       throw new Error('Unexpected error');
     });

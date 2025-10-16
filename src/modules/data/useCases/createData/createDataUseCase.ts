@@ -23,6 +23,11 @@ class CreateDataUseCase {
 
       return createData;
     } catch (error) {
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
       throw new AppError('Failed to create data', 500, 'Internal Server Error', error);
     }
   }
