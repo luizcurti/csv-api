@@ -4,6 +4,6 @@ export interface IRequest {
 
 export interface IResponse {
     product_code: string;
-    quantity: string;
+    quantity: number;
     pick_location: string; 
 }

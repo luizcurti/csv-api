@@ -7,15 +7,9 @@ class ListAllDataController {
     const dbDataRepository = new DBDataRepository();
     const listAllDataUseCase = new ListAllDataUseCase(dbDataRepository);
 
-    try {
-      const listDatas = await listAllDataUseCase.execute();
-      return response.status(200).json(listDatas);
-    } catch (error: any) {
-      return response.status(500).json({
-        error: 'Failed to retrieve data.',
-        details: error.message,
-      });
-    }
+    const allData = await listAllDataUseCase.execute();
+
+    return response.status(200).json(allData);
   }
 }
 

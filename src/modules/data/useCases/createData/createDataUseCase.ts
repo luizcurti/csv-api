@@ -10,7 +10,7 @@ class CreateDataUseCase {
     pick_location,
   }: {
     product_code: string;
-    quantity: string;
+    quantity: number;
     pick_location: string;
   }): Promise<interfaceData> {
   

@@ -7,7 +7,6 @@ import { dataRoutes, dataPrefix } from './dataRoute';
 const routes = Router();
 
 routes.use(dataPrefix, dataRoutes);
-
 routes.use(handlingNotFound);
 routes.use(handlingErrors);
 

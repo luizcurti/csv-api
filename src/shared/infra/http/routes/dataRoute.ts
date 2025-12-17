@@ -1,4 +1,10 @@
 import { Router } from 'express';
+import { validateBody, validateParams } from '@shared/infra/http/middlewares/validation';
+import {
+  createDataSchema,
+  editDataSchema,
+  productCodeParamSchema,
+} from '@shared/validation/schemas';
 
 import { CreateDataController } from '@modules/data/useCases/createData/createDataController';
 import { DeleteDataController } from '@modules/data/useCases/deleteData/deleteDataController';
@@ -16,9 +22,30 @@ const editDataController = new EditDataController();
 const deleteDataController = new DeleteDataController();
 
 dataRoutes.get('/', listAllDataController.handle);
-dataRoutes.get('/:product_code', listDataByIdController.handle);
-dataRoutes.post('/', createDataController.handle);
-dataRoutes.put('/:product_code', editDataController.handle);
-dataRoutes.delete('/:product_code', deleteDataController.handle);
+
+dataRoutes.get(
+  '/:product_code',
+  validateParams(productCodeParamSchema),
+  listDataByIdController.handle
+);
+
+dataRoutes.post(
+  '/',
+  validateBody(createDataSchema),
+  createDataController.handle
+);
+
+dataRoutes.put(
+  '/:product_code',
+  validateParams(productCodeParamSchema),
+  validateBody(editDataSchema),
+  editDataController.handle
+);
+
+dataRoutes.delete(
+  '/:product_code',
+  validateParams(productCodeParamSchema),
+  deleteDataController.handle
+);
 
 export { dataRoutes, dataPrefix };
