@@ -40,7 +40,7 @@ describe('ListDataByIdController', () => {
   it('should list data by id successfully', async () => {
     const mockData = {
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     };
 
@@ -60,7 +60,7 @@ describe('ListDataByIdController', () => {
     mockRequest.params = { product_code: '789012' };
     const mockData = {
       product_code: '789012',
-      quantity: '5',
+      quantity: 5,
       pick_location: 'B2'
     };
 
@@ -74,48 +74,37 @@ describe('ListDataByIdController', () => {
   });
 
   it('should handle product not found error', async () => {
-    const notFoundError = new Error('Product not found.');
+    const notFoundError = new Error('Product not found');
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(notFoundError);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(404);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Product not found.'
-    });
+    await expect(
+      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(notFoundError);
   });
 
   it('should handle general errors from use case', async () => {
     const error = new Error('Database connection failed');
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(error);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Internal server error',
-      details: 'Database connection failed',
-    });
+    await expect(
+      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(error);
   });
 
   it('should handle errors without message', async () => {
-    const error = { someProperty: 'value' }; 
+    const error = new Error('Unknown error');
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(error);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Internal server error',
-      details: undefined,
-    });
+    await expect(
+      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow();
   });
 
   it('should handle missing params', async () => {
     mockRequest.params = {};
     const mockData = {
-      product_code: 'undefined',
-      quantity: '10',
+      product_code: undefined,
+      quantity: 10,
       pick_location: 'A1'
     };
 
@@ -124,7 +113,7 @@ describe('ListDataByIdController', () => {
     await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
 
     expect(mockListDataByIdUseCase.execute).toHaveBeenCalledWith({
-      product_code: 'undefined'
+      product_code: undefined
     });
   });
 });

@@ -10,7 +10,7 @@ describe('CreateDataUseCase', () => {
 
     await createData.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
 
@@ -31,7 +31,7 @@ describe('CreateDataUseCase', () => {
     await expect(deleteData.execute({
       product_code: '123456'
     })).rejects.toEqual(
-      new AppError('Data does not exist', 404, 'Not Found')
+      new AppError('Product not found', 404, 'Not Found')
     );
   });
 });

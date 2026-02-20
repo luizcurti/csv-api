@@ -14,9 +14,6 @@ class EditDataUseCase {
   }: IRequest): Promise<interfaceData> {
     const data = await this.dataRepository.findByID(product_code);
 
-    if (!data) 
-      throw new AppError('Data does not exist', 404, 'Not Found');
-
     data.quantity = quantity;
     data.pick_location = pick_location;
 

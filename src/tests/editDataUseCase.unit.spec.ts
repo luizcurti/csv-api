@@ -10,7 +10,7 @@ describe('CreateDataUseCase', () => {
 
     await createData.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
 
@@ -18,7 +18,7 @@ describe('CreateDataUseCase', () => {
 
     const dataEdit = await editData.execute({
       product_code: '123456',
-      quantity: '20',
+      quantity: 20,
       pick_location: 'A2'
     });
 
@@ -27,7 +27,7 @@ describe('CreateDataUseCase', () => {
     expect(dataEdit).toHaveProperty('pick_location');
 
     expect(dataEdit.product_code).toBe('123456');
-    expect(dataEdit.quantity).toBe('20');
+    expect(dataEdit.quantity).toBe(20);
     expect(dataEdit.pick_location).toBe('A2');
   });
 
@@ -37,10 +37,10 @@ describe('CreateDataUseCase', () => {
 
     await expect(editData.execute({
       product_code: '123456',
-      quantity: '20',
+      quantity: 20,
       pick_location: 'A2'
     })).rejects.toEqual(
-      new AppError('Data does not exist', 404, 'Not Found')
+      new AppError('Product not found', 404, 'Not Found')
     );
   });
 });

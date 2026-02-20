@@ -15,7 +15,7 @@ describe('CreateDataUseCase', () => {
 
     const dataCreate = await useCase.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
 
@@ -24,7 +24,7 @@ describe('CreateDataUseCase', () => {
     expect(dataCreate).toHaveProperty('pick_location');
 
     expect(dataCreate.product_code).toBe('123456');
-    expect(dataCreate.quantity).toBe('10');
+    expect(dataCreate.quantity).toBe(10);
     expect(dataCreate.pick_location).toBe('A1');
   });
 
@@ -36,15 +36,15 @@ describe('CreateDataUseCase', () => {
     
     await useCase.execute({ 
       product_code: uniqueProductCode,
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
   
     await expect(useCase.execute({ 
       product_code: uniqueProductCode,
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
-    })).rejects.toThrowError(new AppError('Data exist', 404, 'Not Found'));
+    })).rejects.toThrowError(new AppError('Product already exists', 409, 'Conflict'));
   });
   
 
@@ -53,14 +53,14 @@ describe('CreateDataUseCase', () => {
     const useCase = new CreateDataUseCase(dbDataRepository);
 
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
-      throw new AppError('Data exist', 404, 'Not Found');
+      throw new AppError('Product already exists', 409, 'Conflict');
     });
   
     await expect(useCase.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
-    })).rejects.toThrowError(new AppError('Data exist', 404, 'Not Found'));
+    })).rejects.toThrowError(new AppError('Product already exists', 409, 'Conflict'));
   });
   
   it('should handle unexpected errors properly', async () => {
@@ -73,7 +73,7 @@ describe('CreateDataUseCase', () => {
   
     await expect(useCase.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     })).rejects.toThrowError(new AppError('Failed to create data', 500, 'Internal Server Error'));
   });

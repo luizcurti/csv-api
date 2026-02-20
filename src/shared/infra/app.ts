@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Application } from 'express';
 import 'express-async-errors';
 
 import helmet from 'helmet';
@@ -7,7 +7,7 @@ import cors from 'cors';
 import { routes } from './http/routes/index';
 
 class App {
-  public server: any;
+  public server: Application;
 
   constructor() {
     this.server = express();

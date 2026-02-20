@@ -39,12 +39,12 @@ describe('ListAllDataController', () => {
     const mockDataList = [
       {
         product_code: '123456',
-        quantity: '10',
+        quantity: 10,
         pick_location: 'A1'
       },
       {
         product_code: '789012',
-        quantity: '5',
+        quantity: 5,
         pick_location: 'B2'
       }
     ];
@@ -74,25 +74,17 @@ describe('ListAllDataController', () => {
     const error = new Error('Failed to read CSV file');
     mockListAllDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to retrieve data.',
-      details: 'Failed to read CSV file',
-    });
+    await expect(
+      listAllDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(error);
   });
 
   it('should handle unexpected errors without message', async () => {
-    const error = { someProperty: 'value' }; 
+    const error = new Error('Unknown error');
     mockListAllDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to retrieve data.',
-      details: undefined,
-    });
+    await expect(
+      listAllDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow();
   });
 });

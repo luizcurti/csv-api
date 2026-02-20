@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { DeleteDataController } from '@modules/data/useCases/deleteData/deleteDataController';
 import { DeleteDataUseCase } from '@modules/data/useCases/deleteData/deleteDataUseCase';
 import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
-
+import { AppError } from '@errors/appError';
 
 jest.mock('@modules/data/useCases/deleteData/deleteDataUseCase');
 jest.mock('@modules/data/repositories/dbDataRepository');
@@ -66,45 +66,30 @@ describe('DeleteDataController', () => {
   });
 
   it('should handle 404 error when data not found', async () => {
-    const notFoundError = {
-      statusCode: 404,
-      message: 'Data not found'
-    };
+    const notFoundError = new AppError('Data not found', 404, 'Not Found');
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(notFoundError);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(404);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Data not found.',
-      details: 'Data not found',
-    });
+    await expect(
+      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(notFoundError);
   });
 
   it('should handle general errors from use case', async () => {
     const error = new Error('Database connection failed');
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to delete data.',
-      details: 'Database connection failed',
-    });
+    await expect(
+      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(error);
   });
 
   it('should handle errors without message', async () => {
-    const error = { someProperty: 'value' }; 
+    const error = new Error('Unknown error');
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to delete data.',
-      details: undefined,
-    });
+    await expect(
+      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow();
   });
 
   it('should handle missing params', async () => {
@@ -114,7 +99,7 @@ describe('DeleteDataController', () => {
     await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
 
     expect(mockDeleteDataUseCase.execute).toHaveBeenCalledWith({
-      product_code: 'undefined'
+      product_code: undefined
     });
   });
 });

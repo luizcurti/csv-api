@@ -86,7 +86,7 @@ http://localhost:3005/api/csv/
 ```json
 {
   "product_code": "string",
-  "quantity": "string",
+  "quantity": number,
   "pick_location": "string"
 }
 ```
@@ -103,7 +103,7 @@ http://localhost:3005/api/csv/
 - **Body**:
 ```json
 {
-  "quantity": "string",
+  "quantity": number,
   "pick_location": "string"
 }
 ```
@@ -320,7 +320,7 @@ http://localhost:3005/api/csv/
 ```json
 {
   "product_code": "string",
-  "quantity": "string", 
+  "quantity": number, 
   "pick_location": "string"
 }
 ```
@@ -337,7 +337,7 @@ http://localhost:3005/api/csv/
 - **Body**:
 ```json
 {
-  "quantity": "string",
+  "quantity": number,
   "pick_location": "string"
 }
 ```

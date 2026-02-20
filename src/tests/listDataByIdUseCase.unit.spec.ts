@@ -10,19 +10,19 @@ describe('CreateDataUseCase', () => {
 
     await createData.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
 
     await createData.execute({ 
       product_code: '785412',
-      quantity: '7',
+      quantity: 7,
       pick_location: 'Z5'
     });
 
     await createData.execute({ 
       product_code: '36925814',
-      quantity: '80',
+      quantity: 80,
       pick_location: 'G9'
     });
 
@@ -36,7 +36,7 @@ describe('CreateDataUseCase', () => {
     expect(dataList).toHaveProperty('quantity');
     expect(dataList).toHaveProperty('pick_location');
     expect(dataList.product_code).toBe('785412');
-    expect(dataList.quantity).toBe('7');
+    expect(dataList.quantity).toBe(7);
     expect(dataList.pick_location).toBe('Z5');
   });
 
@@ -47,7 +47,7 @@ describe('CreateDataUseCase', () => {
     await expect(listData.execute({
       product_code: '785412'
     })).rejects.toEqual(
-      new AppError('Data does not exist', 404, 'Not Found')
+      new AppError('Product not found', 404, 'Not Found')
     );
   });
 });

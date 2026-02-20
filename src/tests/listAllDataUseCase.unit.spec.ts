@@ -9,19 +9,19 @@ describe('CreateDataUseCase', () => {
 
     await createData.execute({ 
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     });
 
     await createData.execute({ 
       product_code: '785412',
-      quantity: '7',
+      quantity: 7,
       pick_location: 'Z5'
     });
 
     await createData.execute({ 
       product_code: '36925814',
-      quantity: '80',
+      quantity: 80,
       pick_location: 'G9'
     });
 

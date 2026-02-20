@@ -12,12 +12,12 @@ describe('DBDataRepository', () => {
   const mockData = [
     {
       product_code: '123456',
-      quantity: '10',
+      quantity: 10,
       pick_location: 'A1'
     },
     {
       product_code: '789012',
-      quantity: '5',
+      quantity: 5,
       pick_location: 'B2'
     }
   ];
@@ -77,20 +77,20 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.findByID('999999')).rejects.toThrow('Product not found.');
+      await expect(repository.findByID('999999')).rejects.toThrow('Product not found');
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.findByID('123456')).rejects.toThrow('Product not found.');
+      await expect(repository.findByID('123456')).rejects.toThrow('Product not found');
     });
   });
 
   describe('create', () => {
     const newData = {
       product_code: '555555',
-      quantity: '15',
+      quantity: 15,
       pick_location: 'C3'
     };
 
@@ -114,12 +114,12 @@ describe('DBDataRepository', () => {
 
       const existingData = {
         product_code: '123456',
-        quantity: '20',
+        quantity: 20,
         pick_location: 'D4'
       };
 
       await expect(repository.create(existingData)).rejects.toThrow(
-        new AppError('Data exist', 404, 'Not Found')
+        new AppError('Product already exists', 409, 'Conflict')
       );
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -141,7 +141,7 @@ describe('DBDataRepository', () => {
   describe('update', () => {
     const updatedData = {
       product_code: '123456',
-      quantity: '25',
+      quantity: 25,
       pick_location: 'D4'
     };
 
@@ -165,18 +165,18 @@ describe('DBDataRepository', () => {
 
       const nonExistentData = {
         product_code: '999999',
-        quantity: '25',
+        quantity: 25,
         pick_location: 'D4'
       };
 
-      await expect(repository.update(nonExistentData)).rejects.toThrow('Product not found.');
+      await expect(repository.update(nonExistentData)).rejects.toThrow('Product not found');
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.update(updatedData)).rejects.toThrow('Product not found.');
+      await expect(repository.update(updatedData)).rejects.toThrow('Product not found');
     });
   });
 
@@ -198,14 +198,14 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.remove('999999')).rejects.toThrow('Product not found.');
+      await expect(repository.remove('999999')).rejects.toThrow('Product not found');
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.remove('123456')).rejects.toThrow('Product not found.');
+      await expect(repository.remove('123456')).rejects.toThrow('Product not found');
     });
   });
 

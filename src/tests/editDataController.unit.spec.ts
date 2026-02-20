@@ -21,7 +21,7 @@ describe('EditDataController', () => {
         product_code: '123456'
       },
       body: {
-        quantity: '15',
+        quantity: 15,
         pick_location: 'B2'
       }
     };
@@ -46,7 +46,7 @@ describe('EditDataController', () => {
   it('should edit data successfully', async () => {
     const mockUpdatedData = {
       product_code: '123456',
-      quantity: '15',
+      quantity: 15,
       pick_location: 'B2'
     };
 
@@ -56,14 +56,12 @@ describe('EditDataController', () => {
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
-      quantity: '15',
+      quantity: 15,
       pick_location: 'B2'
     });
 
     expect(mockResponse.status).toHaveBeenCalledWith(200);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      message: 'Data updated successfully.'
-    });
+    expect(mockResponse.json).toHaveBeenCalledWith(mockUpdatedData);
   });
 
   it('should convert all inputs to strings', async () => {
@@ -75,7 +73,7 @@ describe('EditDataController', () => {
 
     const mockUpdatedData = {
       product_code: '123456',
-      quantity: '20',
+      quantity: 20,
       pick_location: 'C3'
     };
 
@@ -85,7 +83,7 @@ describe('EditDataController', () => {
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
-      quantity: '20',
+      quantity: 20,
       pick_location: 'C3'
     });
   });
@@ -94,33 +92,25 @@ describe('EditDataController', () => {
     const error = new Error('Product not found');
     mockEditDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to update data.',
-      details: 'Product not found',
-    });
+    await expect(
+      editDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow(error);
   });
 
   it('should handle errors without message', async () => {
-    const error = { someProperty: 'value' }; 
+    const error = new Error('Unknown error');
     mockEditDataUseCase.execute.mockRejectedValueOnce(error);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Failed to update data.',
-      details: undefined,
-    });
+    await expect(
+      editDataController.handle(mockRequest as Request, mockResponse as Response)
+    ).rejects.toThrow();
   });
 
   it('should handle missing params', async () => {
     mockRequest.params = {};
     const mockUpdatedData = {
-      product_code: 'undefined',
-      quantity: '15',
+      product_code: undefined,
+      quantity: 15,
       pick_location: 'B2'
     };
 
@@ -129,8 +119,8 @@ describe('EditDataController', () => {
     await editDataController.handle(mockRequest as Request, mockResponse as Response);
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
-      product_code: 'undefined',
-      quantity: '15',
+      product_code: undefined,
+      quantity: 15,
       pick_location: 'B2'
     });
   });
@@ -139,8 +129,8 @@ describe('EditDataController', () => {
     mockRequest.body = {};
     const mockUpdatedData = {
       product_code: '123456',
-      quantity: 'undefined',
-      pick_location: 'undefined'
+      quantity: undefined,
+      pick_location: undefined
     };
 
     mockEditDataUseCase.execute.mockResolvedValueOnce(mockUpdatedData);
@@ -149,8 +139,8 @@ describe('EditDataController', () => {
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
-      quantity: 'undefined',
-      pick_location: 'undefined'
+      quantity: undefined,
+      pick_location: undefined
     });
   });
 });

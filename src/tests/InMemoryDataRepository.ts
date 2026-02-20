@@ -1,9 +1,15 @@
 import { interfaceData, IDataRepository } from '@modules/data/repositories/iDataRepository';
+import { AppError } from '@errors/appError';
 
 export class InMemoryLessonsRepository implements IDataRepository {
   public items: interfaceData[] = [];
 
   async create(data: interfaceData): Promise<interfaceData>{
+    const exists = this.items.find((item) => item.product_code === data.product_code);
+    if (exists) {
+      throw new AppError('Product already exists', 409, 'Conflict');
+    }
+
     this.items.push({
       product_code: data.product_code,
       quantity: data.quantity,
@@ -14,7 +20,11 @@ export class InMemoryLessonsRepository implements IDataRepository {
   }
 
   async findByID(product_code: string) {
-    return this.items.find((item) => item.product_code === product_code);
+    const item = this.items.find((item) => item.product_code === product_code);
+    if (!item) {
+      throw new AppError('Product not found', 404, 'Not Found');
+    }
+    return item;
   } 
 
   async findAll() {
@@ -23,6 +33,9 @@ export class InMemoryLessonsRepository implements IDataRepository {
 
   async update(data: interfaceData) {  
     const dataUpdate = this.items.find((item) => item.product_code === data.product_code);
+    if (!dataUpdate) {
+      throw new AppError('Product not found', 404, 'Not Found');
+    }
     Object.assign(dataUpdate, data);
 
     return data
@@ -30,6 +43,9 @@ export class InMemoryLessonsRepository implements IDataRepository {
 
   async remove(product_code: string) {  
     const dataUpdate = this.items.find((item) => item.product_code === product_code);
+    if (!dataUpdate) {
+      throw new AppError('Product not found', 404, 'Not Found');
+    }
     this.items.splice(this.items.indexOf(dataUpdate), 1);
   }
 }
