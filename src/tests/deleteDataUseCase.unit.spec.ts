@@ -16,11 +16,13 @@ describe('CreateDataUseCase', () => {
 
     const deleteData = new DeleteDataUseCase(inMemoryLessonsRepository);
 
-    const dataDelete = await deleteData.execute({
+    await deleteData.execute({
       product_code: '123456'
     });
 
-    expect(dataDelete).toEqual('Deleted');
+    // Verifica que o produto foi deletado tentando buscar (deve lançar erro)
+    const listRepository = inMemoryLessonsRepository.items;
+    expect(listRepository).toHaveLength(0);
   });
 
   it('should not remove a new data', async () => {

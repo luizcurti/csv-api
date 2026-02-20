@@ -38,3 +38,17 @@ export const editDataSchema = Yup.object({
 export const productCodeParamSchema = Yup.object({
   product_code: productCodeSchema,
 });
+
+export const paginationQuerySchema = Yup.object({
+  limit: Yup.number()
+    .integer('Limit must be an integer')
+    .positive('Limit must be positive')
+    .max(1000, 'Limit cannot exceed 1000')
+    .default(100)
+    .optional(),
+  offset: Yup.number()
+    .integer('Offset must be an integer')
+    .min(0, 'Offset cannot be negative')
+    .default(0)
+    .optional(),
+});

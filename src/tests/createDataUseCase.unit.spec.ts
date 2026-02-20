@@ -44,7 +44,7 @@ describe('CreateDataUseCase', () => {
       product_code: uniqueProductCode,
       quantity: 10,
       pick_location: 'A1'
-    })).rejects.toThrowError(new AppError('Product already exists', 409, 'Conflict'));
+    })).rejects.toThrow('already exists');
   });
   
 
@@ -53,14 +53,14 @@ describe('CreateDataUseCase', () => {
     const useCase = new CreateDataUseCase(dbDataRepository);
 
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
-      throw new AppError('Product already exists', 409, 'Conflict');
+      throw new AppError(`Product with code '123456' already exists`, 409, 'Conflict');
     });
   
     await expect(useCase.execute({ 
       product_code: '123456',
       quantity: 10,
       pick_location: 'A1'
-    })).rejects.toThrowError(new AppError('Product already exists', 409, 'Conflict'));
+    })).rejects.toThrow('already exists');
   });
   
   it('should handle unexpected errors properly', async () => {

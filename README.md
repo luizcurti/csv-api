@@ -76,9 +76,27 @@ http://localhost:3005/api/csv/
 ### Routes
 
 #### GET `/api/csv/`
-- **Description**: List all products
-- **Response**: Array of products
+- **Description**: List all products (with pagination)
+- **Query Parameters**:
+  - `limit` (optional): Number of items per page (default: 100, max: 1000)
+  - `offset` (optional): Number of items to skip (default: 0)
+- **Response**: 
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": number,
+    "limit": number,
+    "offset": number,
+    "hasMore": boolean
+  }
+}
+```
 - **Status**: 200 OK
+- **Examples**:
+  - `/api/csv/` - Get first 100 products
+  - `/api/csv/?limit=50` - Get first 50 products
+  - `/api/csv/?limit=50&offset=100` - Get 50 products starting from position 100
 
 #### POST `/api/csv/`
 - **Description**: Create new product
@@ -252,6 +270,38 @@ npm run dev
 
 ``````
 
+### Using Pagination
+
+Examples of using the pagination feature:
+
+```bash
+# Get first 100 products (default)
+curl http://localhost:3005/api/csv/
+
+# Get first 50 products
+curl http://localhost:3005/api/csv/?limit=50
+
+# Get 50 products starting from position 100 (e.g., page 3 with 50 items per page)
+curl http://localhost:3005/api/csv/?limit=50&offset=100
+
+# Response format:
+{
+  "data": [
+    {
+      "product_code": "123456",
+      "quantity": 10,
+      "pick_location": "A1"
+    }
+  ],
+  "pagination": {
+    "total": 1000,      // Total number of items
+    "limit": 50,        // Items per page
+    "offset": 100,      // Starting position
+    "hasMore": true     // Whether there are more items after this page
+  }
+}
+```
+
 ### Quality Verification
 
 To run code quality checks and tests, use the following command:
@@ -310,8 +360,22 @@ http://localhost:3005/api/csv/
 ### Available Routes
 
 #### GET /api/csv/
-- **Description**: List all data from CSV
-- **Response**: Array of products
+- **Description**: List all data from CSV (with pagination)
+- **Query Parameters**:
+  - `limit` (optional): Number of items per page (default: 100, max: 1000)
+  - `offset` (optional): Number of items to skip (default: 0)
+- **Response**: 
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": number,
+    "limit": number,
+    "offset": number,
+    "hasMore": boolean
+  }
+}
+```
 - **Status**: 200 OK
 
 #### POST /api/csv/

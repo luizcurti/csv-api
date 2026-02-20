@@ -27,8 +27,23 @@ export class InMemoryLessonsRepository implements IDataRepository {
     return item;
   } 
 
-  async findAll() {
-    return await this.items;
+  async findAll(options?: { limit?: number; offset?: number }) {
+    const total = this.items.length;
+    const limit = options?.limit || 100;
+    const offset = options?.offset || 0;
+    
+    const paginatedData = this.items.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+    
+    return {
+      data: paginatedData,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore,
+      },
+    };
   }
 
   async update(data: interfaceData) {  

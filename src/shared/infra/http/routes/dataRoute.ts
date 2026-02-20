@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { validateBody, validateParams } from '@shared/infra/http/middlewares/validation';
+import { validateBody, validateParams, validateQuery } from '@shared/infra/http/middlewares/validation';
 import {
   createDataSchema,
   editDataSchema,
   productCodeParamSchema,
+  paginationQuerySchema,
 } from '@shared/validation/schemas';
 
 import { CreateDataController } from '@modules/data/useCases/createData/createDataController';
@@ -21,7 +22,11 @@ const createDataController = new CreateDataController();
 const editDataController = new EditDataController();
 const deleteDataController = new DeleteDataController();
 
-dataRoutes.get('/', listAllDataController.handle);
+dataRoutes.get(
+  '/',
+  validateQuery(paginationQuerySchema),
+  listAllDataController.handle
+);
 
 dataRoutes.get(
   '/:product_code',

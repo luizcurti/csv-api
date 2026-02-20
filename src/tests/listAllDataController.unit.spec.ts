@@ -16,7 +16,9 @@ describe('ListAllDataController', () => {
   beforeEach(() => {
     listAllDataController = new ListAllDataController();
     
-    mockRequest = {};
+    mockRequest = {
+      query: {}
+    };
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
@@ -36,38 +38,94 @@ describe('ListAllDataController', () => {
   });
 
   it('should list all data successfully', async () => {
-    const mockDataList = [
-      {
-        product_code: '123456',
-        quantity: 10,
-        pick_location: 'A1'
-      },
-      {
-        product_code: '789012',
-        quantity: 5,
-        pick_location: 'B2'
+    const mockResult = {
+      data: [
+        {
+          product_code: '123456',
+          quantity: 10,
+          pick_location: 'A1'
+        },
+        {
+          product_code: '789012',
+          quantity: 5,
+          pick_location: 'B2'
+        }
+      ],
+      pagination: {
+        total: 2,
+        limit: 100,
+        offset: 0,
+        hasMore: false
       }
-    ];
+    };
 
-    mockListAllDataUseCase.execute.mockResolvedValueOnce(mockDataList);
+    mockListAllDataUseCase.execute.mockResolvedValueOnce(mockResult);
 
     await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
 
-    expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith();
+    expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
+      limit: undefined,
+      offset: undefined
+    });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
-    expect(mockResponse.json).toHaveBeenCalledWith(mockDataList);
+    expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
   });
 
   it('should return empty array when no data exists', async () => {
-    const mockEmptyList: any[] = [];
+    const mockEmptyResult = {
+      data: [],
+      pagination: {
+        total: 0,
+        limit: 100,
+        offset: 0,
+        hasMore: false
+      }
+    };
 
-    mockListAllDataUseCase.execute.mockResolvedValueOnce(mockEmptyList);
+    mockListAllDataUseCase.execute.mockResolvedValueOnce(mockEmptyResult);
 
     await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
 
-    expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith();
+    expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
+      limit: undefined,
+      offset: undefined
+    });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
-    expect(mockResponse.json).toHaveBeenCalledWith(mockEmptyList);
+    expect(mockResponse.json).toHaveBeenCalledWith(mockEmptyResult);
+  });
+
+  it('should handle pagination with limit and offset', async () => {
+    mockRequest.query = {
+      limit: '50',
+      offset: '10'
+    };
+
+    const mockResult = {
+      data: [
+        {
+          product_code: '123456',
+          quantity: 10,
+          pick_location: 'A1'
+        }
+      ],
+      pagination: {
+        total: 100,
+        limit: 50,
+        offset: 10,
+        hasMore: true
+      }
+    };
+
+    mockListAllDataUseCase.execute.mockResolvedValueOnce(mockResult);
+
+    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
+
+    expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
+      limit: 50,
+      offset: 10
+    });
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
   });
 
   it('should handle errors from use case', async () => {

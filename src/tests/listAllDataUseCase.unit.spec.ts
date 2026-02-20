@@ -27,24 +27,67 @@ describe('CreateDataUseCase', () => {
 
     const listData = new ListAllDataUseCase(inMemoryLessonsRepository);
 
-    const data = await listData.execute();
+    const result = await listData.execute();
 
-    expect(data).toHaveLength(3);
+    expect(result.data).toHaveLength(3);
+    expect(result.pagination.total).toBe(3);
+    expect(result.pagination.limit).toBe(100);
+    expect(result.pagination.offset).toBe(0);
+    expect(result.pagination.hasMore).toBe(false);
 
-    expect(data[0]).toHaveProperty('product_code');
-    expect(data[1]).toHaveProperty('quantity');
-    expect(data[2]).toHaveProperty('pick_location');
-    expect(data[0].product_code).toBe('123456');
-    expect(data[1].product_code).toBe('785412');    
-    expect(data[2].product_code).toBe('36925814');
+    expect(result.data[0]).toHaveProperty('product_code');
+    expect(result.data[1]).toHaveProperty('quantity');
+    expect(result.data[2]).toHaveProperty('pick_location');
+    expect(result.data[0].product_code).toBe('123456');
+    expect(result.data[1].product_code).toBe('785412');    
+    expect(result.data[2].product_code).toBe('36925814');
   });
 
   it('should list empty data', async () => {
     const inMemoryLessonsRepository = new InMemoryLessonsRepository()
     const listData = new ListAllDataUseCase(inMemoryLessonsRepository);
 
-    const data = await listData.execute();
+    const result = await listData.execute();
 
-    expect(data).toHaveLength(0);
+    expect(result.data).toHaveLength(0);
+    expect(result.pagination.total).toBe(0);
+    expect(result.pagination.hasMore).toBe(false);
+  });
+
+  it('should paginate data correctly', async () => {
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
+    const createData = new CreateDataUseCase(inMemoryLessonsRepository);
+
+    // Create 5 items
+    for (let i = 0; i < 5; i++) {
+      await createData.execute({
+        product_code: `CODE_${i}`,
+        quantity: i + 1,
+        pick_location: `A${i}`
+      });
+    }
+
+    const listData = new ListAllDataUseCase(inMemoryLessonsRepository);
+
+    // Test with limit
+    const result1 = await listData.execute({ limit: 2 });
+    expect(result1.data).toHaveLength(2);
+    expect(result1.pagination.total).toBe(5);
+    expect(result1.pagination.limit).toBe(2);
+    expect(result1.pagination.offset).toBe(0);
+    expect(result1.pagination.hasMore).toBe(true);
+
+    // Test with offset
+    const result2 = await listData.execute({ limit: 2, offset: 2 });
+    expect(result2.data).toHaveLength(2);
+    expect(result2.pagination.total).toBe(5);
+    expect(result2.pagination.offset).toBe(2);
+    expect(result2.pagination.hasMore).toBe(true);
+
+    // Test last page
+    const result3 = await listData.execute({ limit: 2, offset: 4 });
+    expect(result3.data).toHaveLength(1);
+    expect(result3.pagination.total).toBe(5);
+    expect(result3.pagination.hasMore).toBe(false);
   });
 });

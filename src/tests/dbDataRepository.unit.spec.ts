@@ -29,6 +29,11 @@ describe('DBDataRepository', () => {
   beforeEach(() => {
     repository = new DBDataRepository();
     jest.clearAllMocks();
+    
+    // Mock fs.statSync para retornar um tamanho de arquivo válido
+    mockedFs.statSync.mockReturnValue({
+      size: 1024, // 1KB
+    } as any);
   });
 
   describe('findAll', () => {
@@ -38,7 +43,11 @@ describe('DBDataRepository', () => {
 
       const result = await repository.findAll();
 
-      expect(result).toEqual(mockData);
+      expect(result.data).toEqual(mockData);
+      expect(result.pagination.total).toBe(2);
+      expect(result.pagination.limit).toBe(100);
+      expect(result.pagination.offset).toBe(0);
+      expect(result.pagination.hasMore).toBe(false);
       expect(mockedFs.existsSync).toHaveBeenCalled();
       expect(mockedFs.readFileSync).toHaveBeenCalledWith(expect.any(String), 'utf-8');
     });
@@ -48,7 +57,8 @@ describe('DBDataRepository', () => {
 
       const result = await repository.findAll();
 
-      expect(result).toEqual([]);
+      expect(result.data).toEqual([]);
+      expect(result.pagination.total).toBe(0);
       expect(mockedFs.existsSync).toHaveBeenCalled();
       expect(mockedFs.readFileSync).not.toHaveBeenCalled();
     });
@@ -59,7 +69,8 @@ describe('DBDataRepository', () => {
 
       const result = await repository.findAll();
 
-      expect(result).toEqual([]);
+      expect(result.data).toEqual([]);
+      expect(result.pagination.total).toBe(0);
     });
   });
 
@@ -77,13 +88,13 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.findByID('999999')).rejects.toThrow('Product not found');
+      await expect(repository.findByID('999999')).rejects.toThrow("Product with code '999999' not found");
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.findByID('123456')).rejects.toThrow('Product not found');
+      await expect(repository.findByID('123456')).rejects.toThrow("Product with code '123456' not found");
     });
   });
 
@@ -119,7 +130,7 @@ describe('DBDataRepository', () => {
       };
 
       await expect(repository.create(existingData)).rejects.toThrow(
-        new AppError('Product already exists', 409, 'Conflict')
+        new AppError("Product with code '123456' already exists", 409, 'Conflict')
       );
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -169,14 +180,14 @@ describe('DBDataRepository', () => {
         pick_location: 'D4'
       };
 
-      await expect(repository.update(nonExistentData)).rejects.toThrow('Product not found');
+      await expect(repository.update(nonExistentData)).rejects.toThrow("Product with code '999999' not found");
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.update(updatedData)).rejects.toThrow('Product not found');
+      await expect(repository.update(updatedData)).rejects.toThrow("Product with code '123456' not found");
     });
   });
 
@@ -198,14 +209,14 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.remove('999999')).rejects.toThrow('Product not found');
+      await expect(repository.remove('999999')).rejects.toThrow("Product with code '999999' not found");
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.remove('123456')).rejects.toThrow('Product not found');
+      await expect(repository.remove('123456')).rejects.toThrow("Product with code '123456' not found");
     });
   });
 
@@ -226,7 +237,8 @@ describe('DBDataRepository', () => {
       mockedFs.readFileSync.mockReturnValue(malformedCsv);
 
       const result = await repository.findAll();
-      expect(Array.isArray(result)).toBe(true);
+      expect(Array.isArray(result.data)).toBe(true);
+      expect(result.pagination).toBeDefined();
     });
   });
 });

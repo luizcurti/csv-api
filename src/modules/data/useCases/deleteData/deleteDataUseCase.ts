@@ -7,10 +7,8 @@ class DeleteDataUseCase {
     private dataRepository: IDataRepository
   ) {}
 
-  async execute({product_code}: IRequest): Promise<string>{
+  async execute({product_code}: IRequest): Promise<void>{
     await this.dataRepository.remove(product_code);
-
-    return "Deleted";
   }
 }
 
