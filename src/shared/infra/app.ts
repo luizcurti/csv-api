@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 
 import helmet from 'helmet';
@@ -29,6 +29,12 @@ class App {
 
   routes() {
     this.server.use('/api/csv', routes);
+
+    // Global 404 handler for paths outside /api/csv
+    this.server.use((_req: Request, res: Response, _next: NextFunction) => {
+      res.status(404).json({ message: 'Route Not Found' });
+    });
+
     console.log('[SERVER] ROUTES REGISTERED');
   }
 }
