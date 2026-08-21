@@ -70,7 +70,7 @@ jobs:
 
       # Upload coverage
       - name: 📤 Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
