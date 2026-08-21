@@ -2,34 +2,35 @@ import { CreateDataUseCase } from '@modules/data/useCases/createData/createDataU
 import { InMemoryLessonsRepository } from './InMemoryDataRepository';
 import { ListDataByIdUseCase } from '@modules/data/useCases/listDataById/listDataByIdUseCase';
 import { AppError } from '@errors/appError';
+import { IDataRepository } from '@modules/data/repositories/iDataRepository';
 
-describe('CreateDataUseCase', () => {
+describe('ListDataByIdUseCase', () => {
   it('should list data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const createData = new CreateDataUseCase(inMemoryLessonsRepository);
 
-    await createData.execute({ 
+    await createData.execute({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
 
-    await createData.execute({ 
+    await createData.execute({
       product_code: '785412',
       quantity: 7,
-      pick_location: 'Z5'
+      pick_location: 'Z5',
     });
 
-    await createData.execute({ 
+    await createData.execute({
       product_code: '36925814',
       quantity: 80,
-      pick_location: 'G9'
+      pick_location: 'G9',
     });
 
     const listData = new ListDataByIdUseCase(inMemoryLessonsRepository);
 
     const dataList = await listData.execute({
-      product_code: '785412'
+      product_code: '785412',
     });
 
     expect(dataList).toHaveProperty('product_code');
@@ -41,13 +42,28 @@ describe('CreateDataUseCase', () => {
   });
 
   it('should not remove a new data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const listData = new ListDataByIdUseCase(inMemoryLessonsRepository);
 
-    await expect(listData.execute({
-      product_code: '785412'
-    })).rejects.toEqual(
-      new AppError('Product not found', 404, 'Not Found')
+    await expect(
+      listData.execute({
+        product_code: '785412',
+      })
+    ).rejects.toEqual(new AppError('Product not found', 404, 'Not Found'));
+  });
+
+  it('should throw when the repository resolves without an error but returns no data', async () => {
+    const repositoryWithoutMatch: IDataRepository = {
+      create: jest.fn(),
+      findByID: jest.fn().mockResolvedValue(undefined),
+      findAll: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+    const listData = new ListDataByIdUseCase(repositoryWithoutMatch);
+
+    await expect(listData.execute({ product_code: '000000' })).rejects.toEqual(
+      new AppError('Data does not exist', 404, 'Not Found')
     );
   });
 });

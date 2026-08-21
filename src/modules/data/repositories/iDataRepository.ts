@@ -1,4 +1,4 @@
-export interface interfaceData {
+export interface IData {
   product_code: string;
   quantity: number;
   pick_location: string;
@@ -20,9 +20,9 @@ export interface PaginatedResult<T> {
 }
 
 export interface IDataRepository {
-  create(data: interfaceData): Promise<interfaceData>;
-  findByID(product_code: string): Promise<interfaceData>;
-  findAll(options?: PaginationOptions): Promise<PaginatedResult<interfaceData>>;
-  update(data: interfaceData): Promise<interfaceData>;
+  create(data: IData): Promise<IData>;
+  findByID(product_code: string): Promise<IData>;
+  findAll(options?: PaginationOptions): Promise<PaginatedResult<IData>>;
+  update(data: IData): Promise<IData>;
   remove(product_code: string): Promise<void>;
 }

@@ -4,7 +4,6 @@ import { AppError } from '@errors/appError';
 import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 
 describe('CreateDataUseCase', () => {
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -13,10 +12,10 @@ describe('CreateDataUseCase', () => {
     const inMemoryLessonsRepositoryCreate = new InMemoryLessonsRepository();
     const useCase = new CreateDataUseCase(inMemoryLessonsRepositoryCreate);
 
-    const dataCreate = await useCase.execute({ 
+    const dataCreate = await useCase.execute({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
 
     expect(dataCreate).toHaveProperty('product_code');
@@ -29,52 +28,61 @@ describe('CreateDataUseCase', () => {
   });
 
   it('should not create a new data when data already exists', async () => {
-    const dbDataRepository = new DBDataRepository();
-    const useCase = new CreateDataUseCase(dbDataRepository);
-  
-    const uniqueProductCode = `TEST_${Date.now()}`;
-    
-    await useCase.execute({ 
-      product_code: uniqueProductCode,
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
+    const useCase = new CreateDataUseCase(inMemoryLessonsRepository);
+
+    await useCase.execute({
+      product_code: '654321',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
-  
-    await expect(useCase.execute({ 
-      product_code: uniqueProductCode,
-      quantity: 10,
-      pick_location: 'A1'
-    })).rejects.toThrow('already exists');
+
+    await expect(
+      useCase.execute({
+        product_code: '654321',
+        quantity: 10,
+        pick_location: 'A1',
+      })
+    ).rejects.toThrow('already exists');
   });
-  
 
   it('should throw an error if the repository throws an error', async () => {
     const dbDataRepository = new DBDataRepository();
     const useCase = new CreateDataUseCase(dbDataRepository);
 
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
-      throw new AppError(`Product with code '123456' already exists`, 409, 'Conflict');
+      throw new AppError(
+        `Product with code '123456' already exists`,
+        409,
+        'Conflict'
+      );
     });
-  
-    await expect(useCase.execute({ 
-      product_code: '123456',
-      quantity: 10,
-      pick_location: 'A1'
-    })).rejects.toThrow('already exists');
+
+    await expect(
+      useCase.execute({
+        product_code: '123456',
+        quantity: 10,
+        pick_location: 'A1',
+      })
+    ).rejects.toThrow('already exists');
   });
-  
+
   it('should handle unexpected errors properly', async () => {
     const dbDataRepository = new DBDataRepository();
     const useCase = new CreateDataUseCase(dbDataRepository);
-  
+
     jest.spyOn(dbDataRepository, 'create').mockImplementationOnce(() => {
       throw new Error('Unexpected error');
     });
-  
-    await expect(useCase.execute({ 
-      product_code: '123456',
-      quantity: 10,
-      pick_location: 'A1'
-    })).rejects.toThrowError(new AppError('Failed to create data', 500, 'Internal Server Error'));
+
+    await expect(
+      useCase.execute({
+        product_code: '123456',
+        quantity: 10,
+        pick_location: 'A1',
+      })
+    ).rejects.toThrowError(
+      new AppError('Failed to create data', 500, 'Internal Server Error')
+    );
   });
 });

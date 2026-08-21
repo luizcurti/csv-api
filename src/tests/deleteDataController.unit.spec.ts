@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { DeleteDataController } from '@modules/data/useCases/deleteData/deleteDataController';
 import { DeleteDataUseCase } from '@modules/data/useCases/deleteData/deleteDataUseCase';
-import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 import { AppError } from '@errors/appError';
 
 jest.mock('@modules/data/useCases/deleteData/deleteDataUseCase');
@@ -15,11 +14,11 @@ describe('DeleteDataController', () => {
 
   beforeEach(() => {
     deleteDataController = new DeleteDataController();
-    
+
     mockRequest = {
       params: {
-        product_code: '123456'
-      }
+        product_code: '123456',
+      },
     };
 
     mockResponse = {
@@ -27,12 +26,13 @@ describe('DeleteDataController', () => {
       json: jest.fn().mockReturnThis(),
     };
 
-
     mockDeleteDataUseCase = {
-      execute: jest.fn()
-    } as any;
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<DeleteDataUseCase>;
 
-    (DeleteDataUseCase as jest.MockedClass<typeof DeleteDataUseCase>).mockImplementation(() => mockDeleteDataUseCase);
+    (
+      DeleteDataUseCase as jest.MockedClass<typeof DeleteDataUseCase>
+    ).mockImplementation(() => mockDeleteDataUseCase);
   });
 
   afterEach(() => {
@@ -42,15 +42,18 @@ describe('DeleteDataController', () => {
   it('should delete data successfully', async () => {
     mockDeleteDataUseCase.execute.mockResolvedValueOnce(undefined);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
+    await deleteDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockDeleteDataUseCase.execute).toHaveBeenCalledWith({
-      product_code: '123456'
+      product_code: '123456',
     });
 
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith({
-      message: 'Data deleted successfully.'
+      message: 'Data deleted successfully.',
     });
   });
 
@@ -58,10 +61,13 @@ describe('DeleteDataController', () => {
     mockRequest.params = { product_code: '789012' };
     mockDeleteDataUseCase.execute.mockResolvedValueOnce(undefined);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
+    await deleteDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockDeleteDataUseCase.execute).toHaveBeenCalledWith({
-      product_code: '789012'
+      product_code: '789012',
     });
   });
 
@@ -70,7 +76,10 @@ describe('DeleteDataController', () => {
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(notFoundError);
 
     await expect(
-      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+      deleteDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(notFoundError);
   });
 
@@ -79,7 +88,10 @@ describe('DeleteDataController', () => {
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+      deleteDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(error);
   });
 
@@ -88,7 +100,10 @@ describe('DeleteDataController', () => {
     mockDeleteDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      deleteDataController.handle(mockRequest as Request, mockResponse as Response)
+      deleteDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow();
   });
 
@@ -96,10 +111,13 @@ describe('DeleteDataController', () => {
     mockRequest.params = {};
     mockDeleteDataUseCase.execute.mockResolvedValueOnce(undefined);
 
-    await deleteDataController.handle(mockRequest as Request, mockResponse as Response);
+    await deleteDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockDeleteDataUseCase.execute).toHaveBeenCalledWith({
-      product_code: undefined
+      product_code: undefined,
     });
   });
 });

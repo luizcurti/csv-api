@@ -68,7 +68,12 @@ describe('AppError', () => {
 
     it('should handle null and undefined data', () => {
       const errorWithNull = new AppError('Test', 400, 'Bad Request', null);
-      const errorWithUndefined = new AppError('Test', 400, 'Bad Request', undefined);
+      const errorWithUndefined = new AppError(
+        'Test',
+        400,
+        'Bad Request',
+        undefined
+      );
 
       expect(errorWithNull.data).toBeNull();
       expect(errorWithUndefined.data).toEqual({});
@@ -96,7 +101,7 @@ describe('AppError', () => {
     it('should call Error.captureStackTrace when available', () => {
       const originalCaptureStackTrace = Error.captureStackTrace;
       const mockCaptureStackTrace = jest.fn();
-      
+
       Error.captureStackTrace = mockCaptureStackTrace;
 
       const error = new AppError('Test error');
@@ -109,7 +114,8 @@ describe('AppError', () => {
     it('should handle when Error.captureStackTrace is not available', () => {
       const originalCaptureStackTrace = Error.captureStackTrace;
 
-      (Error as any).captureStackTrace = undefined;
+      (Error as unknown as Record<string, unknown>).captureStackTrace =
+        undefined;
 
       expect(() => {
         new AppError('Test error');
@@ -120,8 +126,8 @@ describe('AppError', () => {
 
     it('should handle when Error.captureStackTrace is null', () => {
       const originalCaptureStackTrace = Error.captureStackTrace;
-      
-      (Error as any).captureStackTrace = null;
+
+      (Error as unknown as Record<string, unknown>).captureStackTrace = null;
 
       expect(() => {
         new AppError('Test error');
@@ -160,7 +166,7 @@ describe('AppError', () => {
     it('should handle extremely long messages', () => {
       const longMessage = 'a'.repeat(10000);
       const error = new AppError(longMessage);
-      
+
       expect(error.message).toBe(longMessage);
       expect(error.message.length).toBe(10000);
     });
@@ -168,26 +174,26 @@ describe('AppError', () => {
     it('should handle special characters in message', () => {
       const specialMessage = '🚀 Error with émojis and spëcial chàracters!';
       const error = new AppError(specialMessage);
-      
+
       expect(error.message).toBe(specialMessage);
     });
 
     it('should handle negative error codes', () => {
       const error = new AppError('Test', -1);
-      
+
       expect(error.code).toBe(-1);
     });
 
     it('should handle zero error code', () => {
       const error = new AppError('Test', 0);
-      
+
       expect(error.code).toBe(0);
     });
 
     it('should handle very large error codes', () => {
       const largeCode = 999999;
       const error = new AppError('Test', largeCode);
-      
+
       expect(error.code).toBe(largeCode);
     });
   });

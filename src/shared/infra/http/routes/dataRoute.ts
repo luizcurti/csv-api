@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { validateBody, validateParams, validateQuery } from '@shared/infra/http/middlewares/validation';
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+} from '@shared/infra/http/middlewares/validation';
 import {
   createDataSchema,
   editDataSchema,

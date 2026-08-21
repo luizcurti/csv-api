@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant ReqA as Request A (POST)
+    participant ReqB as Request B (POST, concurrent)
+    participant Mutex as writeLock (async-mutex)
+    participant Repo as DBDataRepository
+    participant CSV as csv/data.csv
+
+    ReqA->>Repo: create(dataA)
+    Repo->>Mutex: runExclusive(...)
+    ReqB->>Repo: create(dataB)
+    Repo->>Mutex: runExclusive(...) [queued]
+
+    Mutex-->>Repo: lock granted to A
+    Repo->>CSV: read all rows
+    Repo->>Repo: sanitize + check duplicate
+    Repo->>CSV: write all rows (A included)
+    Repo->>Mutex: release lock
+
+    Mutex-->>Repo: lock granted to B
+    Repo->>CSV: read all rows (already includes A)
+    Repo->>Repo: sanitize + check duplicate
+    Repo->>CSV: write all rows (A + B)
+    Repo->>Mutex: release lock
+
+    Note over ReqA,ReqB: Read-modify-write on the CSV file is serialized<br/>per repository instance, preventing lost updates<br/>between concurrent create / update / remove calls.

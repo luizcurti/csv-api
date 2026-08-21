@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { ListDataByIdController } from '@modules/data/useCases/listDataById/listDataByIdController';
 import { ListDataByIdUseCase } from '@modules/data/useCases/listDataById/listDataByIdUseCase';
-import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 
 jest.mock('@modules/data/useCases/listDataById/listDataByIdUseCase');
 jest.mock('@modules/data/repositories/dbDataRepository');
@@ -14,11 +13,11 @@ describe('ListDataByIdController', () => {
 
   beforeEach(() => {
     listDataByIdController = new ListDataByIdController();
-    
+
     mockRequest = {
       params: {
-        product_code: '123456'
-      }
+        product_code: '123456',
+      },
     };
 
     mockResponse = {
@@ -27,10 +26,12 @@ describe('ListDataByIdController', () => {
     };
 
     mockListDataByIdUseCase = {
-      execute: jest.fn()
-    } as any;
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<ListDataByIdUseCase>;
 
-    (ListDataByIdUseCase as jest.MockedClass<typeof ListDataByIdUseCase>).mockImplementation(() => mockListDataByIdUseCase);
+    (
+      ListDataByIdUseCase as jest.MockedClass<typeof ListDataByIdUseCase>
+    ).mockImplementation(() => mockListDataByIdUseCase);
   });
 
   afterEach(() => {
@@ -41,15 +42,18 @@ describe('ListDataByIdController', () => {
     const mockData = {
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     };
 
     mockListDataByIdUseCase.execute.mockResolvedValueOnce(mockData);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
+    await listDataByIdController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListDataByIdUseCase.execute).toHaveBeenCalledWith({
-      product_code: '123456'
+      product_code: '123456',
     });
 
     expect(mockResponse.status).toHaveBeenCalledWith(200);
@@ -61,15 +65,18 @@ describe('ListDataByIdController', () => {
     const mockData = {
       product_code: '789012',
       quantity: 5,
-      pick_location: 'B2'
+      pick_location: 'B2',
     };
 
     mockListDataByIdUseCase.execute.mockResolvedValueOnce(mockData);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
+    await listDataByIdController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListDataByIdUseCase.execute).toHaveBeenCalledWith({
-      product_code: '789012'
+      product_code: '789012',
     });
   });
 
@@ -78,7 +85,10 @@ describe('ListDataByIdController', () => {
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(notFoundError);
 
     await expect(
-      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+      listDataByIdController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(notFoundError);
   });
 
@@ -87,7 +97,10 @@ describe('ListDataByIdController', () => {
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+      listDataByIdController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(error);
   });
 
@@ -96,7 +109,10 @@ describe('ListDataByIdController', () => {
     mockListDataByIdUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      listDataByIdController.handle(mockRequest as Request, mockResponse as Response)
+      listDataByIdController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow();
   });
 
@@ -105,15 +121,18 @@ describe('ListDataByIdController', () => {
     const mockData = {
       product_code: undefined,
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     };
 
     mockListDataByIdUseCase.execute.mockResolvedValueOnce(mockData);
 
-    await listDataByIdController.handle(mockRequest as Request, mockResponse as Response);
+    await listDataByIdController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListDataByIdUseCase.execute).toHaveBeenCalledWith({
-      product_code: undefined
+      product_code: undefined,
     });
   });
 });

@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+package-lock.json
+data_csv.postman_collection.json
+csv/
+docs/img/

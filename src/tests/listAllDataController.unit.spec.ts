@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { ListAllDataController } from '@modules/data/useCases/listAllData/listAllDataController';
 import { ListAllDataUseCase } from '@modules/data/useCases/listAllData/listAllDataUseCase';
-import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
-
 
 jest.mock('@modules/data/useCases/listAllData/listAllDataUseCase');
 jest.mock('@modules/data/repositories/dbDataRepository');
@@ -15,9 +13,9 @@ describe('ListAllDataController', () => {
 
   beforeEach(() => {
     listAllDataController = new ListAllDataController();
-    
+
     mockRequest = {
-      query: {}
+      query: {},
     };
 
     mockResponse = {
@@ -25,12 +23,13 @@ describe('ListAllDataController', () => {
       json: jest.fn().mockReturnThis(),
     };
 
-
     mockListAllDataUseCase = {
-      execute: jest.fn()
-    } as any;
-    
-    (ListAllDataUseCase as jest.MockedClass<typeof ListAllDataUseCase>).mockImplementation(() => mockListAllDataUseCase);
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<ListAllDataUseCase>;
+
+    (
+      ListAllDataUseCase as jest.MockedClass<typeof ListAllDataUseCase>
+    ).mockImplementation(() => mockListAllDataUseCase);
   });
 
   afterEach(() => {
@@ -43,29 +42,32 @@ describe('ListAllDataController', () => {
         {
           product_code: '123456',
           quantity: 10,
-          pick_location: 'A1'
+          pick_location: 'A1',
         },
         {
           product_code: '789012',
           quantity: 5,
-          pick_location: 'B2'
-        }
+          pick_location: 'B2',
+        },
       ],
       pagination: {
         total: 2,
         limit: 100,
         offset: 0,
-        hasMore: false
-      }
+        hasMore: false,
+      },
     };
 
     mockListAllDataUseCase.execute.mockResolvedValueOnce(mockResult);
 
-    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
+    await listAllDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
       limit: undefined,
-      offset: undefined
+      offset: undefined,
     });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
@@ -78,17 +80,20 @@ describe('ListAllDataController', () => {
         total: 0,
         limit: 100,
         offset: 0,
-        hasMore: false
-      }
+        hasMore: false,
+      },
     };
 
     mockListAllDataUseCase.execute.mockResolvedValueOnce(mockEmptyResult);
 
-    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
+    await listAllDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
       limit: undefined,
-      offset: undefined
+      offset: undefined,
     });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith(mockEmptyResult);
@@ -97,7 +102,7 @@ describe('ListAllDataController', () => {
   it('should handle pagination with limit and offset', async () => {
     mockRequest.query = {
       limit: '50',
-      offset: '10'
+      offset: '10',
     };
 
     const mockResult = {
@@ -105,24 +110,27 @@ describe('ListAllDataController', () => {
         {
           product_code: '123456',
           quantity: 10,
-          pick_location: 'A1'
-        }
+          pick_location: 'A1',
+        },
       ],
       pagination: {
         total: 100,
         limit: 50,
         offset: 10,
-        hasMore: true
-      }
+        hasMore: true,
+      },
     };
 
     mockListAllDataUseCase.execute.mockResolvedValueOnce(mockResult);
 
-    await listAllDataController.handle(mockRequest as Request, mockResponse as Response);
+    await listAllDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockListAllDataUseCase.execute).toHaveBeenCalledWith({
       limit: 50,
-      offset: 10
+      offset: 10,
     });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
@@ -133,7 +141,10 @@ describe('ListAllDataController', () => {
     mockListAllDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      listAllDataController.handle(mockRequest as Request, mockResponse as Response)
+      listAllDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(error);
   });
 
@@ -142,7 +153,10 @@ describe('ListAllDataController', () => {
     mockListAllDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      listAllDataController.handle(mockRequest as Request, mockResponse as Response)
+      listAllDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow();
   });
 });

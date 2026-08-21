@@ -1,3 +1,3 @@
 export interface IRequest {
-    product_code: string;
+  product_code: string;
 }

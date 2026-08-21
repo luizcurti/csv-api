@@ -1,13 +1,14 @@
-# CSV-API
+# picklist-api
 
-![CI](https://github.com/luizcurti/csv-api/workflows/CI/badge.svg)
+![CI](https://github.com/luizcurti/picklist-api/workflows/CI/badge.svg)
 
-REST API for CSV data management with complete CRUD operations using Clean Architecture principles.
+REST API for CSV-backed product data management with complete CRUD operations, built with Clean Architecture principles.
 
 ## 📋 Prerequisites
 
-- Node.js 18+
+- Node.js 20.19+ (see `.nvmrc`)
 - npm
+- Docker (optional, for containerized runs)
 
 ## 🚀 Quick Start
 
@@ -15,520 +16,248 @@ REST API for CSV data management with complete CRUD operations using Clean Archi
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Copy the example environment file
+cp .env.example .env
 
-# Or use interactive menu
-npm run menu
+# Start development server (hot reload)
+npm run dev
 ```
 
-**API Base URL**: `http://localhost:3005/api/csv`
+**API base URL**: `http://localhost:3005/api/csv`
+**Interactive API docs (Swagger UI)**: `http://localhost:3005/docs`
+**Health check**: `http://localhost:3005/health`
+**Postman collection**: `data_csv.postman_collection.json`
 
-**Postman Collection**: `data_csv.postman_collection.json`
+### Run with Docker
 
+```bash
+docker compose up --build
+```
 
+This builds the production image, mounts `./csv` as a volume so data persists on the host, and exposes the API on `http://localhost:3005`.
 
-## �️ Available Scripts
+## 🛠️ Available Scripts
 
 ### Development
+
 ```bash
 npm run dev              # Start development server with hot reload
-npm run dev:menu         # Interactive development menu
 ```
 
 ### Testing
+
 ```bash
-npm test                 # Run unit tests with coverage
-npm run test:watch       # Run tests in watch mode  
-npm run test:api         # Test all API endpoints
-npm run test:collection  # Test Postman collection
+npm test                 # Run unit + integration tests with coverage (100% enforced)
+npm run test:unit        # Run only unit tests
+npm run test:integration # Run only integration tests (real Express app + supertest)
+npm run test:e2e         # Run e2e tests against a live server (see Testing below)
+npm run test:watch       # Run unit + integration tests in watch mode
 ```
 
 ### Build & Production
+
 ```bash
-npm run build            # Compile TypeScript to dist/
-npm start                # Start production server
-npm run clean            # Clean build files
+npm run build            # Compile TypeScript to dist/ (tsc + tsc-alias)
+npm start                # Start production server from dist/
+npm run clean            # Remove build/coverage artifacts
 ```
 
 ### Code Quality
+
 ```bash
-npm run eslint           # Check code quality
+npm run eslint           # Lint with ESLint (flat config)
 npm run eslint:fix       # Fix ESLint issues automatically
+npm run format           # Format the codebase with Prettier
+npm run format:check     # Check formatting without writing
 ```
 
 ### Automation
 
 ```bash
-npm run menu             # Interactive development menu
-npm run start:test       # Build + Start + Test + Stop
-npm run ci               # Full CI pipeline (lint + test + build)
-npm run setup            # Initial project setup
+npm run setup            # Install dependencies + build
+npm run ci                # Full pipeline: lint + format check + test + build
+```
+
+### Documentation
+
+```bash
+npm run docs:diagrams    # Regenerate docs/img/*.png from docs/mmd/*.mmd
 ```
 
 ## 📋 API Endpoints
 
 ### Base URL
+
 ```
 http://localhost:3005/api/csv/
 ```
 
-### Routes
-
 #### GET `/api/csv/`
-- **Description**: List all products (with pagination)
+
+- **Description**: List all products (paginated)
 - **Query Parameters**:
-  - `limit` (optional): Number of items per page (default: 100, max: 1000)
-  - `offset` (optional): Number of items to skip (default: 0)
-- **Response**: 
+  - `limit` (optional): Items per page (default: 100, max: 1000)
+  - `offset` (optional): Items to skip (default: 0)
+- **Response**:
+
 ```json
 {
   "data": [...],
   "pagination": {
-    "total": number,
-    "limit": number,
-    "offset": number,
-    "hasMore": boolean
+    "total": 1000,
+    "limit": 100,
+    "offset": 0,
+    "hasMore": true
   }
 }
 ```
+
 - **Status**: 200 OK
-- **Examples**:
-  - `/api/csv/` - Get first 100 products
-  - `/api/csv/?limit=50` - Get first 50 products
-  - `/api/csv/?limit=50&offset=100` - Get 50 products starting from position 100
 
 #### POST `/api/csv/`
-- **Description**: Create new product
-- **Body**:
-```json
-{
-  "product_code": "string",
-  "quantity": number,
-  "pick_location": "string"
-}
-```
-- **Response**: Created product
-- **Status**: 201 Created
+
+- **Description**: Create a new product
+- **Body**: `{ "product_code": "string", "quantity": number, "pick_location": "string" }`
+- **Status**: 201 Created / 400 Validation error / 409 Already exists
 
 #### GET `/api/csv/:product_code`
-- **Description**: Find product by code
-- **Response**: Product object
+
+- **Description**: Find a product by code
 - **Status**: 200 OK / 404 Not Found
 
 #### PUT `/api/csv/:product_code`
-- **Description**: Update existing product
-- **Body**:
-```json
-{
-  "quantity": number,
-  "pick_location": "string"
-}
-```
-- **Response**: Success message
+
+- **Description**: Update an existing product
+- **Body**: `{ "quantity": number, "pick_location": "string" }`
 - **Status**: 200 OK / 404 Not Found
 
 #### DELETE `/api/csv/:product_code`
-- **Description**: Delete product by code
-- **Response**: Success message
+
+- **Description**: Delete a product by code
 - **Status**: 200 OK / 404 Not Found
 
+#### GET `/health`
 
+- **Description**: Liveness check (`status`, `uptime`, `timestamp`)
+- **Status**: 200 OK
+
+Full request/response schemas are available interactively at `/docs` (Swagger UI).
 
 ## 🧪 Testing
 
-### Unit Tests
-- **Framework**: Jest with TypeScript
-- **Coverage**: 100% code coverage (74 tests)
-- **Location**: `src/tests/`
-- **Command**: `npm test`
+Three independent layers, covering both happy and sad paths (validation errors, not found, conflicts, rate limiting, unknown routes):
 
-### API Testing
-- **Tool**: Automated bash scripts with curl
-- **Script**: `./scripts/test-api.sh`
-- **Command**: `npm run test:api`
+- **Unit** (`src/tests/*.unit.spec.ts`): use cases, controllers, the repository, middlewares, config and utilities tested in isolation (mocked `fs`, in-memory repository, module-registry resets for env-dependent branches).
+- **Integration** (`src/tests/*.integration.spec.ts`): boots the real Express app in-process and drives it with `supertest` against an isolated, disposable CSV file — full CRUD flow, validation, health check, Swagger UI, 404s.
+- **E2E** (`src/tests/*.e2e.spec.ts`): black-box tests that make real HTTP requests over the network against an already-running server (typically the Docker container). Run separately:
 
-### Test Categories
-- ✅ Use Cases (business logic)
-- ✅ Controllers (HTTP handlers)  
-- ✅ Repository (data access)
-- ✅ Error handling
-- ✅ Integration tests
+  ```bash
+  docker compose up -d --build
+  npm run test:e2e
+  docker compose down
+  ```
+
+  Point it at a different instance with `E2E_BASE_URL=http://localhost:3005 npm run test:e2e`. The suite restores the original `csv/data.csv` content in `afterAll`, regardless of test outcome.
+
+- **Coverage**: `npm test` (unit + integration) enforces a **100% threshold** (statements, branches, functions, lines) via `jest.config.js` — the build fails if coverage regresses. Reports are written to `coverage/` (text, LCOV, HTML).
 
 ## 🏗️ Architecture
 
-This project follows **Clean Architecture** principles:
+This project follows **Clean Architecture** principles. For a diagram-driven
+walkthrough of the request lifecycle, the mutex-protected CSV writes, and
+the Docker build, see **[docs/SYSTEM_FLOW.md](docs/SYSTEM_FLOW.md)**.
 
-### Project Structure
 ```
 src/
+├── config/                 # Centralized, validated environment configuration
+│   └── env.ts
 ├── errors/                 # Custom error classes
 │   └── appError.ts
 ├── modules/
 │   └── data/
-│       ├── repositories/   # Data access layer
+│       ├── repositories/   # Data access layer (CSV file, mutex-protected writes)
 │       │   ├── dbDataRepository.ts
 │       │   └── iDataRepository.ts
-│       └── useCases/      # Business logic
+│       └── useCases/       # Business logic
 │           ├── createData/
 │           ├── deleteData/
 │           ├── editData/
 │           ├── listAllData/
 │           └── listDataById/
 ├── shared/
-│   └── infra/
-│       ├── app.ts         # Express configuration
-│       ├── server.ts      # Main server
-│       └── http/
-│           ├── middlewares/
-│           └── routes/
-└── tests/                 # Unit tests (100% coverage)
+│   ├── infra/
+│   │   ├── app.ts          # Express app (middlewares, routes, docs, health)
+│   │   ├── server.ts       # Entry point + graceful shutdown
+│   │   └── http/
+│   │       ├── docs/       # OpenAPI spec
+│   │       ├── middlewares/
+│   │       └── routes/
+│   ├── utils/               # Logger, CSV sanitizer
+│   └── validation/          # Yup schemas
+└── tests/                   # Unit and integration tests
 ```
 
-### Design Patterns
-- ✅ Clean Architecture
-- ✅ Repository Pattern
-- ✅ Use Case Pattern
-- ✅ Dependency Injection
-- ✅ Error Handling Pattern
+### Design patterns & practices
+
+- ✅ Clean Architecture (controller → use case → repository)
+- ✅ Repository pattern with dependency injection
+- ✅ Centralized, validated configuration (`src/config/env.ts`)
+- ✅ Mutex-protected CSV writes (no lost updates under concurrent requests)
+- ✅ Structured JSON logging
+- ✅ Graceful shutdown on `SIGTERM`/`SIGINT`
 
 ## 🔧 Configuration
 
-### ESLint
-- ✅ Airbnb + Prettier configuration
-- ✅ TypeScript support
-- ✅ Jest testing support
-- ✅ Automatic fix available
+### Environment variables
 
-### Jest
-- ✅ TypeScript configuration
-- ✅ Path mapping (@modules, @shared)
-- ✅ 100% code coverage
-- ✅ HTML, text, and LCOV reports
+| Variable               | Default        | Description                             |
+| ---------------------- | -------------- | --------------------------------------- |
+| `PORT`                 | `3005`         | HTTP port                               |
+| `NODE_ENV`             | `development`  | `development`, `production` or `test`   |
+| `CSV_FILE_PATH`        | `csv/data.csv` | Path to the CSV data store              |
+| `CORS_ORIGIN`          | `*`            | Allowed CORS origin(s), comma-separated |
+| `RATE_LIMIT_WINDOW_MS` | `60000`        | Rate limit window (ms) for `/api/*`     |
+| `RATE_LIMIT_MAX`       | `100`          | Max requests per window for `/api/*`    |
 
-### Babel
-- ✅ TypeScript compilation
-- ✅ Path aliases support
-- ✅ Static file copying
+See `.env.example`.
 
-## 🚦 Development Workflow
+### Security & hardening
 
-### Daily Development
-```bash
-# Use interactive menu
-npm run menu
+- `helmet` for HTTP security headers
+- `cors` with configurable origin
+- `express-rate-limit` on `/api/*`
+- Server-side error responses never leak stack traces in `NODE_ENV=production`
+- CSV injection sanitization on writes (`csvSanitizer.ts`)
 
-# Or start dev server
-npm run dev
-npm run start:test
-``````
+### Tooling
 
+- **ESLint 9** flat config (`eslint.config.js`) with `typescript-eslint`
+- **Prettier 3** for formatting
+- **tsc** + **tsc-alias** for the production build (path aliases resolved at build time)
+- **ts-node-dev** for local development
 
-
-### For CI/CD
+## 🐳 Docker
 
 ```bash
-npm run ci
+# Build and run with docker-compose (recommended)
+docker compose up --build
 
-``````
-
-### For Initial Setup
-
-To perform the initial project setup, run:
-
-```bash
-npm run setup
-
-``````
-
-## 📊 Usage Examples
-
-### Complete API Testing
-
-```bash
-# 1. Compile the project
-npm run build
-
-# 2. Start server in background
-npm start &
-
-# 3. Execute API tests
-npm run test:api
-
-# 4. Stop the server
-kill %1
-
-``````
-
-
-### Development with Hot Reload
-
-To start the development server with hot reload, run:
-
-```bash
-npm run dev
-
-``````
-
-### Using Pagination
-
-Examples of using the pagination feature:
-
-```bash
-# Get first 100 products (default)
-curl http://localhost:3005/api/csv/
-
-# Get first 50 products
-curl http://localhost:3005/api/csv/?limit=50
-
-# Get 50 products starting from position 100 (e.g., page 3 with 50 items per page)
-curl http://localhost:3005/api/csv/?limit=50&offset=100
-
-# Response format:
-{
-  "data": [
-    {
-      "product_code": "123456",
-      "quantity": 10,
-      "pick_location": "A1"
-    }
-  ],
-  "pagination": {
-    "total": 1000,      // Total number of items
-    "limit": 50,        // Items per page
-    "offset": 100,      // Starting position
-    "hasMore": true     // Whether there are more items after this page
-  }
-}
+# Or manually
+docker build -t picklist-api .
+docker run -p 3005:3005 -v "$(pwd)/csv:/app/csv" picklist-api
 ```
 
-### Quality Verification
-
-To run code quality checks and tests, use the following command:
-
-```bash
-npm run eslint:fix && npm test
-
-``````
-
-## 🎯 VS Code Configuration
-
-For better VS Code integration, you can configure automatic tasks:
-
-### `.vscode/tasks.json`
-
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Start Dev Server",
-      "type": "npm",
-      "script": "dev",
-      "group": "build",
-      "isBackground": true
-    },
-    {
-      "label": "Test API",
-      "type": "npm",
-      "script": "test:api",
-      "group": "test"
-    },
-    {
-      "label": "Full CI",
-      "type": "npm",
-      "script": "ci",
-      "group": "build"
-    }
-  ]
-}
-
-``````
-### `.vscode/launch.json`
-
-```json
-
-
-
-
-
-### Base URL
-```
-http://localhost:3005/api/csv/
-```
-
-### Available Routes
-
-#### GET /api/csv/
-- **Description**: List all data from CSV (with pagination)
-- **Query Parameters**:
-  - `limit` (optional): Number of items per page (default: 100, max: 1000)
-  - `offset` (optional): Number of items to skip (default: 0)
-- **Response**: 
-```json
-{
-  "data": [...],
-  "pagination": {
-    "total": number,
-    "limit": number,
-    "offset": number,
-    "hasMore": boolean
-  }
-}
-```
-- **Status**: 200 OK
-
-#### POST /api/csv/
-- **Description**: Create new product
-- **Body**:
-```json
-{
-  "product_code": "string",
-  "quantity": number, 
-  "pick_location": "string"
-}
-```
-- **Response**: Created product
-- **Status**: 201 Created
-
-#### GET /api/csv/:product_code
-- **Description**: Find product by product code
-- **Response**: Product object
-- **Status**: 200 OK / 404 Not Found
-
-#### PUT /api/csv/:product_code
-- **Description**: Update existing product
-- **Body**:
-```json
-{
-  "quantity": number,
-  "pick_location": "string"
-}
-```
-- **Response**: Success message
-- **Status**: 200 OK / 404 Not Found
-
-#### DELETE /api/csv/:product_code
-- **Description**: Delete product by product code
-- **Response**: Success message
-- **Status**: 200 OK / 404 Not Found
-
-## 🧪 Testing
-
-### Unit Tests
-- **Coverage**: 100% code coverage
-- **Framework**: Jest with TypeScript
-- **Test files**: All in `src/tests/` directory
-- **Command**: `npm test`
-
-### API Tests
-- **Tool**: Automated curl scripts
-- **File**: `./scripts/test-api.sh`
-- **Command**: `npm run test:api`
-
-### Test Categories
-- ✅ Use Cases (business logic)
-- ✅ Controllers (HTTP handlers)
-- ✅ Repository (data access)
-- ✅ Error handling
-- ✅ Integration tests
-
-## 🚀 Deployment
-
-### Production Build
-```bash
-npm run build
-npm start
-```
-
-### Development Server
-```bash
-npm run dev
-```
-
-### Environment Variables
-- `PORT`: Server port (default: 3005)
-- `ENV`: Environment (LOCAL, PROD)
-
-## 🏗️ Architecture
-
-This project follows **Clean Architecture** principles:
-
-### Layers
-1. **Entities**: Core business objects
-2. **Use Cases**: Business logic and rules
-3. **Controllers**: HTTP request/response handling
-4. **Repository**: Data access abstraction
-5. **Infrastructure**: External concerns (HTTP, CSV files)
-
-### Design Patterns
-- ✅ Dependency Injection
-- ✅ Repository Pattern
-- ✅ Use Case Pattern
-- ✅ Error Handling Pattern
-
-## � Scripts Overview
-
-### Interactive Menu (`npm run menu`)
-1. 🏗️ Build project
-2. 🚀 Start server
-3. 🧪 Run unit tests
-4. �🔍 Run ESLint
-5. 🌐 Test API endpoints
-6. 📋 Test Postman collection
-7. 🚀 Start server + Test API
-8. 🔧 Full development cycle
-9. 📊 Generate test coverage
-10. 🧹 Clean build directory
-11. 🔄 CI Pipeline
-
-### Automated Scripts
-- `./scripts/test-api.sh` - Complete API testing
-- `./scripts/test-collection.sh` - Postman collection testing
-- `./scripts/dev-menu.sh` - Interactive development menu
-- `./scripts/validate-workflows.sh` - GitHub Actions validation
-
-## 🔍 Features
-
-- ✅ **Complete CRUD Operations**
-- ✅ **CSV File Management**
-- ✅ **Data Validation (Yup)**
-- ✅ **Error Handling**
-- ✅ **100% Test Coverage**
-- ✅ **ESLint + Prettier**
-- ✅ **TypeScript Support**
-- ✅ **Hot Reload Development**
-- ✅ **Automated Testing Scripts**
-- ✅ **GitHub Actions CI/CD**
-- ✅ **Interactive Development Menu**
-- ✅ **Clean Architecture**
-
-## 🚀 Deployment
-
-### Production Build
-```bash
-npm run build
-npm start
-```
-
-### Environment Variables
-- `PORT`: Server port (default: 3005)
-- `ENV`: Environment (LOCAL, PROD)
+The image is a multi-stage build (compile with `tsc`, run on a slim `node:22-alpine` runtime as a non-root user) with a built-in `HEALTHCHECK` against `/health`.
 
 ## 🤝 Contributing
 
 1. Fork the project
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Run tests (`npm test`)
-4. Run linting (`npm run eslint:fix`)
-5. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-6. Push to the branch (`git push origin feature/AmazingFeature`)
-7. Open a Pull Request
+3. Run tests (`npm test`) and linting (`npm run eslint:fix`)
+4. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
----
-
-**💡 Pro Tip:** Use `npm run menu` for an interactive development experience with all available options!
+This project is licensed under the ISC License.

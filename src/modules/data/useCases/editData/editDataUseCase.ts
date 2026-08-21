@@ -1,17 +1,17 @@
-import { AppError } from '@errors/appError';
 import { IRequest } from './iEditDataDTO';
-import { IDataRepository, interfaceData } from '@modules/data/repositories/iDataRepository';
+import {
+  IDataRepository,
+  IData,
+} from '@modules/data/repositories/iDataRepository';
 
 class EditDataUseCase {
-  constructor(
-    private dataRepository: IDataRepository
-  ) {}
+  constructor(private dataRepository: IDataRepository) {}
 
-  async execute({      
+  async execute({
     product_code,
     quantity,
-    pick_location  
-  }: IRequest): Promise<interfaceData> {
+    pick_location,
+  }: IRequest): Promise<IData> {
     const data = await this.dataRepository.findByID(product_code);
 
     data.quantity = quantity;

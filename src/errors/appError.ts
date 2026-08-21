@@ -1,9 +1,14 @@
 export class AppError extends Error {
   public readonly code: number;
   public readonly type: string;
-  public readonly data: any;
+  public readonly data: unknown;
 
-  constructor(message = '', code = 400, type = 'Bad Request', data = {}) {
+  constructor(
+    message = '',
+    code = 400,
+    type = 'Bad Request',
+    data: unknown = {}
+  ) {
     super(message);
     this.code = code;
     this.type = type;

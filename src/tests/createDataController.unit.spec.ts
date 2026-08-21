@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { CreateDataController } from '@modules/data/useCases/createData/createDataController';
 import { CreateDataUseCase } from '@modules/data/useCases/createData/createDataUseCase';
-import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 import { AppError } from '@errors/appError';
 
 jest.mock('@modules/data/useCases/createData/createDataUseCase');
@@ -15,13 +14,13 @@ describe('CreateDataController', () => {
 
   beforeEach(() => {
     createDataController = new CreateDataController();
-    
+
     mockRequest = {
       body: {
         product_code: '123456',
         quantity: 10,
-        pick_location: 'A1'
-      }
+        pick_location: 'A1',
+      },
     };
 
     mockResponse = {
@@ -30,10 +29,12 @@ describe('CreateDataController', () => {
     };
 
     mockCreateDataUseCase = {
-      execute: jest.fn()
-    } as any;
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<CreateDataUseCase>;
 
-    (CreateDataUseCase as jest.MockedClass<typeof CreateDataUseCase>).mockImplementation(() => mockCreateDataUseCase);
+    (
+      CreateDataUseCase as jest.MockedClass<typeof CreateDataUseCase>
+    ).mockImplementation(() => mockCreateDataUseCase);
   });
 
   afterEach(() => {
@@ -44,17 +45,20 @@ describe('CreateDataController', () => {
     const mockCreatedData = {
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     };
 
     mockCreateDataUseCase.execute.mockResolvedValueOnce(mockCreatedData);
 
-    await createDataController.handle(mockRequest as Request, mockResponse as Response);
+    await createDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockCreateDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
 
     expect(mockResponse.status).toHaveBeenCalledWith(201);
@@ -63,11 +67,14 @@ describe('CreateDataController', () => {
 
   it('should return validation error when required fields are missing', async () => {
     mockRequest.body = {
-      product_code: '123456'
+      product_code: '123456',
     };
 
-    await createDataController.handle(mockRequest as Request, mockResponse as Response);
-    
+    await createDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
+
     expect(mockCreateDataUseCase.execute).toHaveBeenCalled();
   });
 
@@ -76,7 +83,10 @@ describe('CreateDataController', () => {
     mockCreateDataUseCase.execute.mockRejectedValueOnce(appError);
 
     await expect(
-      createDataController.handle(mockRequest as Request, mockResponse as Response)
+      createDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(appError);
   });
 
@@ -85,7 +95,10 @@ describe('CreateDataController', () => {
     mockCreateDataUseCase.execute.mockRejectedValueOnce(unexpectedError);
 
     await expect(
-      createDataController.handle(mockRequest as Request, mockResponse as Response)
+      createDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(unexpectedError);
   });
 
@@ -93,23 +106,26 @@ describe('CreateDataController', () => {
     mockRequest.body = {
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     };
 
     const mockCreatedData = {
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     };
 
     mockCreateDataUseCase.execute.mockResolvedValueOnce(mockCreatedData);
 
-    await createDataController.handle(mockRequest as Request, mockResponse as Response);
+    await createDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockCreateDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
   });
 });

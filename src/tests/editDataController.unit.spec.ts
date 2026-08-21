@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { EditDataController } from '@modules/data/useCases/editData/editDataController';
 import { EditDataUseCase } from '@modules/data/useCases/editData/editDataUseCase';
-import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
-
 
 jest.mock('@modules/data/useCases/editData/editDataUseCase');
 jest.mock('@modules/data/repositories/dbDataRepository');
@@ -15,15 +13,15 @@ describe('EditDataController', () => {
 
   beforeEach(() => {
     editDataController = new EditDataController();
-    
+
     mockRequest = {
       params: {
-        product_code: '123456'
+        product_code: '123456',
       },
       body: {
         quantity: 15,
-        pick_location: 'B2'
-      }
+        pick_location: 'B2',
+      },
     };
 
     mockResponse = {
@@ -31,12 +29,13 @@ describe('EditDataController', () => {
       json: jest.fn().mockReturnThis(),
     };
 
-
     mockEditDataUseCase = {
-      execute: jest.fn()
-    } as any;
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<EditDataUseCase>;
 
-    (EditDataUseCase as jest.MockedClass<typeof EditDataUseCase>).mockImplementation(() => mockEditDataUseCase);
+    (
+      EditDataUseCase as jest.MockedClass<typeof EditDataUseCase>
+    ).mockImplementation(() => mockEditDataUseCase);
   });
 
   afterEach(() => {
@@ -47,17 +46,20 @@ describe('EditDataController', () => {
     const mockUpdatedData = {
       product_code: '123456',
       quantity: 15,
-      pick_location: 'B2'
+      pick_location: 'B2',
     };
 
     mockEditDataUseCase.execute.mockResolvedValueOnce(mockUpdatedData);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
+    await editDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
       quantity: 15,
-      pick_location: 'B2'
+      pick_location: 'B2',
     });
 
     expect(mockResponse.status).toHaveBeenCalledWith(200);
@@ -68,23 +70,26 @@ describe('EditDataController', () => {
     mockRequest.params = { product_code: '123456' };
     mockRequest.body = {
       quantity: 20,
-      pick_location: 'C3'
+      pick_location: 'C3',
     };
 
     const mockUpdatedData = {
       product_code: '123456',
       quantity: 20,
-      pick_location: 'C3'
+      pick_location: 'C3',
     };
 
     mockEditDataUseCase.execute.mockResolvedValueOnce(mockUpdatedData);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
+    await editDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
       quantity: 20,
-      pick_location: 'C3'
+      pick_location: 'C3',
     });
   });
 
@@ -93,7 +98,10 @@ describe('EditDataController', () => {
     mockEditDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      editDataController.handle(mockRequest as Request, mockResponse as Response)
+      editDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow(error);
   });
 
@@ -102,7 +110,10 @@ describe('EditDataController', () => {
     mockEditDataUseCase.execute.mockRejectedValueOnce(error);
 
     await expect(
-      editDataController.handle(mockRequest as Request, mockResponse as Response)
+      editDataController.handle(
+        mockRequest as Request,
+        mockResponse as Response
+      )
     ).rejects.toThrow();
   });
 
@@ -111,17 +122,20 @@ describe('EditDataController', () => {
     const mockUpdatedData = {
       product_code: undefined,
       quantity: 15,
-      pick_location: 'B2'
+      pick_location: 'B2',
     };
 
     mockEditDataUseCase.execute.mockResolvedValueOnce(mockUpdatedData);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
+    await editDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: undefined,
       quantity: 15,
-      pick_location: 'B2'
+      pick_location: 'B2',
     });
   });
 
@@ -130,17 +144,20 @@ describe('EditDataController', () => {
     const mockUpdatedData = {
       product_code: '123456',
       quantity: undefined,
-      pick_location: undefined
+      pick_location: undefined,
     };
 
     mockEditDataUseCase.execute.mockResolvedValueOnce(mockUpdatedData);
 
-    await editDataController.handle(mockRequest as Request, mockResponse as Response);
+    await editDataController.handle(
+      mockRequest as Request,
+      mockResponse as Response
+    );
 
     expect(mockEditDataUseCase.execute).toHaveBeenCalledWith({
       product_code: '123456',
       quantity: undefined,
-      pick_location: undefined
+      pick_location: undefined,
     });
   });
 });

@@ -5,13 +5,13 @@ import { AppError } from '@errors/appError';
 
 describe('CreateDataUseCase', () => {
   it('should remove a new data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const createData = new CreateDataUseCase(inMemoryLessonsRepository);
 
-    await createData.execute({ 
+    await createData.execute({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
 
     const editData = new EditDataUseCase(inMemoryLessonsRepository);
@@ -19,7 +19,7 @@ describe('CreateDataUseCase', () => {
     const dataEdit = await editData.execute({
       product_code: '123456',
       quantity: 20,
-      pick_location: 'A2'
+      pick_location: 'A2',
     });
 
     expect(dataEdit).toHaveProperty('product_code');
@@ -32,15 +32,15 @@ describe('CreateDataUseCase', () => {
   });
 
   it('should not remove a new data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const editData = new EditDataUseCase(inMemoryLessonsRepository);
 
-    await expect(editData.execute({
-      product_code: '123456',
-      quantity: 20,
-      pick_location: 'A2'
-    })).rejects.toEqual(
-      new AppError('Product not found', 404, 'Not Found')
-    );
+    await expect(
+      editData.execute({
+        product_code: '123456',
+        quantity: 20,
+        pick_location: 'A2',
+      })
+    ).rejects.toEqual(new AppError('Product not found', 404, 'Not Found'));
   });
 });

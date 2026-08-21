@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { AppError } from '@errors/appError';
+import { env } from '@config/env';
+import { logger } from '@shared/utils/logger';
 
 export function handlingErrors(
   err: Error,
-  _request: Request,
+  request: Request,
   response: Response,
   next: NextFunction
 ) {
@@ -15,12 +17,17 @@ export function handlingErrors(
       });
     }
 
-    const data = {
-      errorStack: err.stack,
-      message: `Internal server error: \n${err.message}`,
-    };
+    logger.error('Unhandled error', {
+      message: err.message,
+      stack: err.stack,
+      path: request.path,
+      method: request.method,
+    });
 
-    return response.status(500).json(data);
+    return response.status(500).json({
+      message: 'Internal server error',
+      ...(env.isProduction ? {} : { errorStack: err.stack }),
+    });
   }
 
   next();

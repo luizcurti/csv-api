@@ -1,0 +1,52 @@
+flowchart TD
+    C[HTTP Client]
+
+    subgraph EXPRESS["Express App (app.ts)"]
+        MW["Middlewares\ncors, helmet, rate-limit, json"]
+        HEALTH["GET /health"]
+        DOCS["GET /docs (Swagger UI)"]
+    end
+
+    subgraph HTTP["HTTP Layer (shared/infra/http)"]
+        ROUTES["Router: /api/csv"]
+        VAL["Validation middleware\n(Yup schemas)"]
+        CTRL["Controllers"]
+    end
+
+    subgraph APP["Application Layer (modules/data/useCases)"]
+        UC["Use Cases\nCreate / Edit / Delete / ListAll / ListById"]
+    end
+
+    subgraph DOMAIN["Domain Layer"]
+        IREPO["IDataRepository (interface)"]
+    end
+
+    subgraph INFRA["Infrastructure Layer"]
+        REPO["DBDataRepository\nmutex-protected writes + read cache"]
+        CSV[("csv/data.csv")]
+    end
+
+    subgraph CROSS["Cross-cutting concerns"]
+        ERR["handlingErrors / AppError"]
+        LOG["Logger (structured JSON)"]
+        CFG["config/env.ts\n(validated env vars)"]
+    end
+
+    C -->|HTTP request| MW
+    MW --> HEALTH
+    MW --> DOCS
+    MW --> ROUTES
+    ROUTES --> VAL
+    VAL --> CTRL
+    CTRL --> UC
+    UC --> IREPO
+    IREPO -.implemented by.-> REPO
+    REPO <--> CSV
+
+    CTRL -. on throw .-> ERR
+    UC -. on throw .-> ERR
+    REPO -. on throw .-> ERR
+    REPO --> LOG
+    ERR --> LOG
+    REPO -. reads .-> CFG
+    EXPRESS -. reads .-> CFG

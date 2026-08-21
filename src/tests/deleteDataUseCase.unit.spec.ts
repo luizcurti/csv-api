@@ -5,35 +5,34 @@ import { AppError } from '@errors/appError';
 
 describe('CreateDataUseCase', () => {
   it('should remove a new data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const createData = new CreateDataUseCase(inMemoryLessonsRepository);
 
-    await createData.execute({ 
+    await createData.execute({
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     });
 
     const deleteData = new DeleteDataUseCase(inMemoryLessonsRepository);
 
     await deleteData.execute({
-      product_code: '123456'
+      product_code: '123456',
     });
 
-    // Verifica que o produto foi deletado tentando buscar (deve lançar erro)
+    // Verify the product was deleted by checking the repository is empty
     const listRepository = inMemoryLessonsRepository.items;
     expect(listRepository).toHaveLength(0);
   });
 
   it('should not remove a new data', async () => {
-    const inMemoryLessonsRepository = new InMemoryLessonsRepository()
+    const inMemoryLessonsRepository = new InMemoryLessonsRepository();
     const deleteData = new DeleteDataUseCase(inMemoryLessonsRepository);
 
-
-    await expect(deleteData.execute({
-      product_code: '123456'
-    })).rejects.toEqual(
-      new AppError('Product not found', 404, 'Not Found')
-    );
+    await expect(
+      deleteData.execute({
+        product_code: '123456',
+      })
+    ).rejects.toEqual(new AppError('Product not found', 404, 'Not Found'));
   });
 });

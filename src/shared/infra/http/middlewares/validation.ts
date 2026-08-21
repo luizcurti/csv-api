@@ -13,12 +13,9 @@ export function validateBody(schema: Yup.AnyObjectSchema) {
       next();
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
-        throw new AppError(
-          err.errors.join(', '),
-          400,
-          'VALIDATION_FAILED',
-          { errors: err.errors }
-        );
+        throw new AppError(err.errors.join(', '), 400, 'VALIDATION_FAILED', {
+          errors: err.errors,
+        });
       }
       throw err;
     }
@@ -36,12 +33,9 @@ export function validateParams(schema: Yup.AnyObjectSchema) {
       next();
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
-        throw new AppError(
-          err.errors.join(', '),
-          400,
-          'VALIDATION_FAILED',
-          { errors: err.errors }
-        );
+        throw new AppError(err.errors.join(', '), 400, 'VALIDATION_FAILED', {
+          errors: err.errors,
+        });
       }
       throw err;
     }
@@ -59,12 +53,9 @@ export function validateQuery(schema: Yup.AnyObjectSchema) {
       next();
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
-        throw new AppError(
-          err.errors.join(', '),
-          400,
-          'VALIDATION_FAILED',
-          { errors: err.errors }
-        );
+        throw new AppError(err.errors.join(', '), 400, 'VALIDATION_FAILED', {
+          errors: err.errors,
+        });
       }
       throw err;
     }

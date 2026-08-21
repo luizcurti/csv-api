@@ -1,0 +1,19 @@
+flowchart LR
+    subgraph BUILD["Build stage — node:22-alpine"]
+        SRC["src/ + tsconfig.json"] -->|"npm ci<br/>tsc + tsc-alias"| DIST["dist/"]
+    end
+
+    subgraph RUNTIME["Runtime stage — node:22-alpine (non-root)"]
+        DIST -->|copy| RDIST["dist/"]
+        PKG["package.json"] -->|"npm ci --omit=dev"| NM["node_modules"]
+        SEED["csv/ (seed data)"] -->|copy| RCSV["csv/"]
+        RDIST --> START["node dist/shared/infra/server.js"]
+        NM --> START
+        RCSV --> START
+        HEALTH["HEALTHCHECK\nGET /health"] -.-> START
+    end
+
+    subgraph COMPOSE["docker-compose"]
+        START -->|listens :3005| PORT["Host :3005"]
+        VOL[("./csv bind mount")] <-->|read/write| RCSV
+    end

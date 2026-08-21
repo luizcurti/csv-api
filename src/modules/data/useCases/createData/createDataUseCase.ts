@@ -1,5 +1,8 @@
 import { AppError } from '@errors/appError';
-import { IDataRepository, interfaceData } from '@modules/data/repositories/iDataRepository';
+import {
+  IDataRepository,
+  IData,
+} from '@modules/data/repositories/iDataRepository';
 
 class CreateDataUseCase {
   constructor(private dataRepository: IDataRepository) {}
@@ -12,8 +15,7 @@ class CreateDataUseCase {
     product_code: string;
     quantity: number;
     pick_location: string;
-  }): Promise<interfaceData> {
-  
+  }): Promise<IData> {
     try {
       const createData = await this.dataRepository.create({
         product_code,
@@ -23,12 +25,16 @@ class CreateDataUseCase {
 
       return createData;
     } catch (error) {
-
       if (error instanceof AppError) {
         throw error;
       }
 
-      throw new AppError('Failed to create data', 500, 'Internal Server Error', error);
+      throw new AppError(
+        'Failed to create data',
+        500,
+        'Internal Server Error',
+        error
+      );
     }
   }
 }

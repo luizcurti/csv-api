@@ -1,25 +1,36 @@
 import fs from 'fs';
+import { parse } from 'csv-parse/sync';
 import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 import { AppError } from '@errors/appError';
 
 jest.mock('fs');
+// Wrap the real implementation so every existing test keeps parsing for
+// real, while one test below can override a single call to simulate a
+// non-Error throwable from the dependency.
+jest.mock('csv-parse/sync', () => {
+  const actual: typeof import('csv-parse/sync') =
+    jest.requireActual('csv-parse/sync');
+  return { ...actual, parse: jest.fn(actual.parse) };
+});
+
+const mockedParse = parse as jest.Mock;
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
 describe('DBDataRepository', () => {
   let repository: DBDataRepository;
-  
+
   const mockData = [
     {
       product_code: '123456',
       quantity: 10,
-      pick_location: 'A1'
+      pick_location: 'A1',
     },
     {
       product_code: '789012',
       quantity: 5,
-      pick_location: 'B2'
-    }
+      pick_location: 'B2',
+    },
   ];
 
   const mockCsvContent = `product_code,quantity,pick_location
@@ -29,11 +40,11 @@ describe('DBDataRepository', () => {
   beforeEach(() => {
     repository = new DBDataRepository();
     jest.clearAllMocks();
-    
-    // Mock fs.statSync para retornar um tamanho de arquivo válido
+
+    // Mock fs.statSync to return a valid file size
     mockedFs.statSync.mockReturnValue({
       size: 1024, // 1KB
-    } as any);
+    } as fs.Stats);
   });
 
   describe('findAll', () => {
@@ -49,7 +60,10 @@ describe('DBDataRepository', () => {
       expect(result.pagination.offset).toBe(0);
       expect(result.pagination.hasMore).toBe(false);
       expect(mockedFs.existsSync).toHaveBeenCalled();
-      expect(mockedFs.readFileSync).toHaveBeenCalledWith(expect.any(String), 'utf-8');
+      expect(mockedFs.readFileSync).toHaveBeenCalledWith(
+        expect.any(String),
+        'utf-8'
+      );
     });
 
     it('should return empty array when CSV file does not exist', async () => {
@@ -88,13 +102,17 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.findByID('999999')).rejects.toThrow("Product with code '999999' not found");
+      await expect(repository.findByID('999999')).rejects.toThrow(
+        "Product with code '999999' not found"
+      );
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.findByID('123456')).rejects.toThrow("Product with code '123456' not found");
+      await expect(repository.findByID('123456')).rejects.toThrow(
+        "Product with code '123456' not found"
+      );
     });
   });
 
@@ -102,7 +120,7 @@ describe('DBDataRepository', () => {
     const newData = {
       product_code: '555555',
       quantity: 15,
-      pick_location: 'C3'
+      pick_location: 'C3',
     };
 
     it('should create new data when product does not exist', async () => {
@@ -126,11 +144,15 @@ describe('DBDataRepository', () => {
       const existingData = {
         product_code: '123456',
         quantity: 20,
-        pick_location: 'D4'
+        pick_location: 'D4',
       };
 
       await expect(repository.create(existingData)).rejects.toThrow(
-        new AppError("Product with code '123456' already exists", 409, 'Conflict')
+        new AppError(
+          "Product with code '123456' already exists",
+          409,
+          'Conflict'
+        )
       );
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -153,7 +175,7 @@ describe('DBDataRepository', () => {
     const updatedData = {
       product_code: '123456',
       quantity: 25,
-      pick_location: 'D4'
+      pick_location: 'D4',
     };
 
     it('should update existing data', async () => {
@@ -177,17 +199,21 @@ describe('DBDataRepository', () => {
       const nonExistentData = {
         product_code: '999999',
         quantity: 25,
-        pick_location: 'D4'
+        pick_location: 'D4',
       };
 
-      await expect(repository.update(nonExistentData)).rejects.toThrow("Product with code '999999' not found");
+      await expect(repository.update(nonExistentData)).rejects.toThrow(
+        "Product with code '999999' not found"
+      );
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.update(updatedData)).rejects.toThrow("Product with code '123456' not found");
+      await expect(repository.update(updatedData)).rejects.toThrow(
+        "Product with code '123456' not found"
+      );
     });
   });
 
@@ -209,14 +235,18 @@ describe('DBDataRepository', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(mockCsvContent);
 
-      await expect(repository.remove('999999')).rejects.toThrow("Product with code '999999' not found");
+      await expect(repository.remove('999999')).rejects.toThrow(
+        "Product with code '999999' not found"
+      );
       expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('should throw error when CSV file is empty', async () => {
       mockedFs.existsSync.mockReturnValue(false);
 
-      await expect(repository.remove('123456')).rejects.toThrow("Product with code '123456' not found");
+      await expect(repository.remove('123456')).rejects.toThrow(
+        "Product with code '123456' not found"
+      );
     });
   });
 
@@ -232,13 +262,62 @@ describe('DBDataRepository', () => {
 
     it('should handle malformed CSV content', async () => {
       const malformedCsv = 'invalid,csv,content\nwith,wrong,number,of,columns';
-      
+
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readFileSync.mockReturnValue(malformedCsv);
 
       const result = await repository.findAll();
       expect(Array.isArray(result.data)).toBe(true);
       expect(result.pagination).toBeDefined();
+    });
+
+    it('should rethrow parse errors unrelated to column count', async () => {
+      const unclosedQuoteCsv =
+        'product_code,quantity,pick_location\n"unterminated,10,A1';
+
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.readFileSync.mockReturnValue(unclosedQuoteCsv);
+
+      await expect(repository.findAll()).rejects.toThrow('Quote Not Closed');
+    });
+
+    it('should stringify a non-Error value thrown by the CSV parser', async () => {
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.readFileSync.mockReturnValue(mockCsvContent);
+      mockedParse.mockImplementationOnce(() => {
+        // Simulate a dependency that throws a non-Error value.
+        throw 'raw parser failure';
+      });
+
+      await expect(repository.findAll()).rejects.toBe('raw parser failure');
+    });
+
+    it('should throw AppError when the CSV file exceeds the maximum size', async () => {
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.statSync.mockReturnValue({
+        size: 11 * 1024 * 1024, // 11MB, over the 10MB limit
+      } as fs.Stats);
+
+      await expect(repository.findAll()).rejects.toThrow(
+        'CSV file is too large'
+      );
+      expect(mockedFs.readFileSync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cache', () => {
+    it('should throw when a product is missing from a warm cache', async () => {
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.readFileSync.mockReturnValue(mockCsvContent);
+
+      // Warm the cache with the current data set.
+      await repository.findAll();
+
+      await expect(repository.findByID('does-not-exist')).rejects.toThrow(
+        "Product with code 'does-not-exist' not found"
+      );
+      // The cached path should not re-read the file from disk.
+      expect(mockedFs.readFileSync).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -11,7 +11,7 @@ jobs:
   ci:
     name: CI Pipeline
     runs-on: ubuntu-latest
-    
+
     steps:
       # Checkout code
       - name: 📥 Checkout
@@ -21,7 +21,7 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       # Install packages
@@ -31,6 +31,10 @@ jobs:
       # Run all lints at once
       - name: 🔍 Run ESLint
         run: npm run eslint
+
+      # Check formatting
+      - name: 🎨 Check formatting
+        run: npm run format:check
 
       # Run all Jest tests at once
       - name: 🧪 Run Jest tests
@@ -44,9 +48,29 @@ jobs:
       - name: 🔒 Security audit
         run: npm audit --omit=dev --audit-level moderate || echo "⚠️ Dev dependencies have known vulnerabilities"
 
+      # Build the production Docker image
+      - name: 🐳 Build Docker image
+        run: docker build -t picklist-api:ci .
+
+      # Run the image and exercise it with real HTTP requests (e2e)
+      - name: 🚀 Run e2e tests against the container
+        run: |
+          docker run -d --name picklist-api-ci -p 3005:3005 picklist-api:ci
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:3005/health > /dev/null; then
+              echo "Container is healthy"
+              break
+            fi
+            echo "Waiting for container to become healthy... ($i)"
+            sleep 2
+          done
+          npm run test:e2e
+          docker stop picklist-api-ci
+          docker rm picklist-api-ci
+
       # Upload coverage
-      - name: � Upload coverage
-        uses: codecov/codecov-action@v3
+      - name: 📤 Upload coverage
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
