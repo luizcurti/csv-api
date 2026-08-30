@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/luizcurti/picklist-api/workflows/CI/badge.svg)
 
-REST API for CSV-backed product data management with complete CRUD operations, built with Clean Architecture principles.
+No database — product data lives in and is served straight from CSV files on disk, with full CRUD, validation, and 100%-enforced test coverage built around that deliberately unconventional storage choice, using Clean Architecture principles.
 
 ## 📋 Prerequisites
 
