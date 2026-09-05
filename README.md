@@ -6,7 +6,7 @@ No database — product data lives in and is served straight from CSV files on d
 
 ## 📋 Prerequisites
 
-- Node.js 20.19+ (see `.nvmrc`)
+- Node.js 24+ (see `.nvmrc`)
 - npm
 - Docker (optional, for containerized runs)
 
@@ -247,7 +247,7 @@ docker build -t picklist-api .
 docker run -p 3005:3005 -v "$(pwd)/csv:/app/csv" picklist-api
 ```
 
-The image is a multi-stage build (compile with `tsc`, run on a slim `node:22-alpine` runtime as a non-root user) with a built-in `HEALTHCHECK` against `/health`.
+The image is a multi-stage build (compile with `tsc`, run on a slim `node:24-alpine` runtime as a non-root user) with a built-in `HEALTHCHECK` against `/health`.
 
 ## 🤝 Contributing
 
