@@ -2,6 +2,7 @@ import fs from 'fs';
 import { parse } from 'csv-parse/sync';
 import { DBDataRepository } from '@modules/data/repositories/dbDataRepository';
 import { AppError } from '@errors/appError';
+import { logger } from '@shared/utils/logger';
 
 jest.mock('fs');
 // Wrap the real implementation so every existing test keeps parsing for
@@ -318,6 +319,23 @@ describe('DBDataRepository', () => {
       );
       // The cached path should not re-read the file from disk.
       expect(mockedFs.readFileSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not rebuild the cache when findAll is called again within the TTL', async () => {
+      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.readFileSync.mockReturnValue(mockCsvContent);
+      const debugSpy = jest.spyOn(logger, 'debug');
+
+      await repository.findAll();
+      expect(debugSpy).toHaveBeenCalledWith('Cache built', expect.any(Object));
+
+      debugSpy.mockClear();
+      await repository.findAll();
+
+      expect(debugSpy).not.toHaveBeenCalledWith(
+        'Cache built',
+        expect.any(Object)
+      );
     });
   });
 });

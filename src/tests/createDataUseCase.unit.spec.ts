@@ -81,7 +81,7 @@ describe('CreateDataUseCase', () => {
         quantity: 10,
         pick_location: 'A1',
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new AppError('Failed to create data', 500, 'Internal Server Error')
     );
   });
